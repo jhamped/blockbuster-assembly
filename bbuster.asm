@@ -27,6 +27,11 @@ EXTERNDELAY = 3
 	opt db 1
 	lmenu db 1
 	
+	xlocRec dw 0
+	ylocRec dw 0
+	widRec dw 0
+	heightRec dw 0
+	
 	ballY dw 163                   ;initial Y location of ball
 	ballX dw 158                   ;initial X location of ball
 	ballLeft db 1                  ;left movement of ball
@@ -43,8 +48,8 @@ EXTERNDELAY = 3
 	strikerX dw 140                ;initial X location of the striker (paddle)
 	strikerY dw 170                ;initial Y location of the striker (paddle)
 	
-	boundaryEnd dw 270             ;ending boundary for the ball and striker
-	boundaryStart dw 10            ;starting boundary for the ball and striker
+	boundaryEnd dw 290             ;ending boundary for the ball and striker
+	boundaryStart dw 5             ;starting boundary for the ball and striker
 	
 	brick1x dw 87h                 ;X and Y locations of the bricks
 	brick1y dw 15h
@@ -67,6 +72,16 @@ EXTERNDELAY = 3
 	brick8y dw 55h
 	
 .code
+drawTitle macro x, y, w, h, c
+	mov xlocRec, x
+	mov ylocRec, y
+	mov widRec, w
+	mov heightRec, h
+	mov color, c
+	
+	call AddRec
+endm
+
 BuildBrick macro  A, B
     push ax
     push bx
@@ -165,7 +180,7 @@ main proc
     mov ds,ax			                   
     
 	call setVideoMode                     ;clear screen
-	;call StartPage                        ;initiate start page
+	call StartPage                        ;initiate start page
 	call menu
     call setVideoMode                      
     call drawBoundary                     
@@ -186,16 +201,111 @@ main proc
     call gameLoop                        ;start gameplay
 main endp
 
+StartPage proc
+	mov ah, 0Bh
+	mov bh, 13h
+	mov bl, 00h
+	int 10h
+
+	drawTitle 99, 20, 24, 4, 13         ;draw B shadow
+	drawTitle 99, 49, 24, 4, 13
+	drawTitle 120, 20, 4, 32, 13
+	drawTitle 103, 20, 4, 32, 13
+	drawTitle 103, 35, 20, 4, 13
+	drawTitle 98, 19, 24, 4, 5          ;draw B
+	drawTitle 98, 48, 24, 4, 5
+	drawTitle 119, 19, 4, 32, 5
+	drawTitle 102, 19, 4, 32, 5
+	drawTitle 102, 34, 20, 4, 5
+
+	drawTitle 131, 20, 4, 32, 13        ;draw L shadow
+	drawTitle 131, 49, 16, 4, 13
+	drawTitle 130, 19, 4, 32, 5         ;draw L
+	drawTitle 130, 48, 16, 4, 5
+	
+	drawTitle 153, 20, 21, 4, 13        ;draw O shadow
+	drawTitle 153, 49, 21, 4, 13
+	drawTitle 153, 20, 4, 32, 13
+	drawTitle 171, 20, 4, 32, 13
+	drawTitle 152, 19, 21, 4, 5         ;draw O
+	drawTitle 152, 48, 21, 4, 5
+	drawTitle 152, 19, 4, 32, 5
+	drawTitle 170, 19, 4, 32, 5
+	
+	drawTitle 181, 20, 18, 4, 13        ;draw C shadow
+	drawTitle 181, 49, 18, 4, 13
+	drawTitle 181, 20, 4, 32, 13
+	drawTitle 180, 19, 18, 4, 5         ;draw C
+	drawTitle 180, 48, 18, 4, 5
+	drawTitle 180, 19, 4, 32, 5
+	
+	drawTitle 205, 20, 4, 33, 13        ;draw K shadow
+	drawTitle 205, 33, 20, 4, 13
+	drawTitle 219, 20, 4, 16, 13
+	drawTitle 222, 33, 4, 20, 13
+	drawTitle 204, 19, 4, 33, 5         ;draw K
+	drawTitle 204, 32, 20, 4, 5
+	drawTitle 218, 19, 4, 16, 5
+	drawTitle 221, 32, 4, 20, 5
+	
+	drawTitle 83, 66, 25, 4, 13         ;draw B shadow
+	drawTitle 83, 96, 25, 4, 13
+	drawTitle 105, 66, 4, 33, 13
+	drawTitle 87, 66, 4, 33, 13
+	drawTitle 87, 82, 21, 4, 13
+	drawTitle 82, 65, 25, 4, 5          ;draw B
+	drawTitle 82, 95, 25, 4, 5
+	drawTitle 104, 65, 4, 33, 5
+	drawTitle 86, 65, 4, 33, 5
+	drawTitle 86, 81, 21, 4, 5
+	
+	drawTitle 115, 66, 4, 33, 13        ;draw U shadow
+	drawTitle 133, 66, 4, 33, 13
+	drawTitle 115, 96, 21, 4, 13
+	drawTitle 114, 65, 4, 33, 5         ;draw U
+	drawTitle 132, 65, 4, 33, 5
+	drawTitle 114, 95, 21, 4, 5
+	
+	drawTitle 145, 66, 18, 4, 13         ;draw S shadow
+	drawTitle 145, 96, 17, 4, 13
+	drawTitle 145, 66, 4, 16, 13
+	drawTitle 159, 80, 4, 20, 13
+	drawTitle 145, 80, 17, 4, 13
+	drawTitle 144, 65, 18, 4, 5          ;draw S
+	drawTitle 144, 95, 17, 4, 5
+	drawTitle 144, 65, 4, 16, 5
+	drawTitle 158, 79, 4, 20, 5
+	drawTitle 144, 79, 17, 4, 5
+	
+	drawTitle 170, 66, 21, 4, 13        ;draw T shadow
+	drawTitle 179, 66, 4, 34, 13
+	drawTitle 169, 65, 21, 4, 5         ;draw T 
+	drawTitle 178, 65, 4, 34, 5
+	
+	drawTitle 197, 66, 4, 33, 13        ;draw E shadow
+	drawTitle 197, 66, 18, 4, 13
+	drawTitle 197, 82, 16, 4, 13
+	drawTitle 197, 96, 18, 4, 13
+	drawTitle 196, 65, 4, 33, 5         ;draw E
+	drawTitle 196, 65, 18, 4, 5
+	drawTitle 196, 81, 16, 4, 5
+	drawTitle 196, 95, 18, 4, 5
+	
+	drawTitle 221, 66, 4, 34, 13         ;draw R shadow
+	drawTitle 221, 66, 22, 4, 13
+	drawTitle 221, 81, 22, 4, 13
+	drawTitle 240, 66, 4, 18, 13
+	drawTitle 236, 81, 4, 19, 13
+	drawTitle 220, 65, 4, 34, 5         ;draw R
+	drawTitle 220, 65, 22, 4, 5
+	drawTitle 220, 80, 22, 4, 5
+	drawTitle 239, 65, 4, 18, 5
+	drawTitle 235, 80, 4, 19, 5
+	
+	ret
+StartPage endp
+
 menu proc
-	MOV AH, 00h
-	MOV AL, 13h
-	INT 10h
-	
-	MOV AH, 0Bh
-	MOV BH, 13h
-	MOV BL, 00h
-	INT 10h
-	
 	mov ah, 02h
 	mov bh, 00h
 	mov dh, 0Fh
@@ -423,41 +533,6 @@ setVideoMode proc
     ret
 setVideoMode endp
 
-StartPage proc
-	mov ah, 02h                         ;set cursor position                    
-	mov bh, 00h                         
-	mov dh, 07h                         ;set row position
-	mov dl, 0Eh                         ;set column position
-	int 10h
-	
-	mov ah, 09h                         ;write text
-	lea dx, blockbuster_text            
-	int 21h
-	
-	mov ah, 02h
-	mov bh, 00h
-	mov dh, 0Eh
-	mov dl, 0Ch
-	int 10h
-	
-	mov ah, 09h
-	lea dx, start_text
-	int 21h
-	
-	mov ah, 00h                         ;read key press
-	int 16h
-	
-	cmp al, 'S'                         ;check if 'S' is pressed
-	je start_game                       ;start game if pressed
-	cmp al, 's'
-	je start_game
-	ret
-
-	start_game:
-		mov begin, 1
-		ret
-StartPage endp
-
 GameCompletedPage proc
 	call setVideoMode
 	
@@ -494,6 +569,31 @@ GameOverPage proc
 	
 	ret
 GameOverPage endp
+
+AddRec proc
+	mov cx, xlocRec           
+	mov dx, ylocRec
+	drawLoopRec:
+		mov ah, 0Ch           ;draw pixel
+		mov al, color
+		mov bh, 00h           ;page number, always 0
+		int 10h
+
+		inc cx
+		mov ax, cx
+		sub ax, xlocRec
+		cmp ax, widRec
+		jng drawLoopRec
+		
+		mov cx, xlocRec
+		inc dx
+		
+		mov ax, dx
+		sub ax, ylocRec
+		cmp ax, heightRec
+		jng drawLoopRec
+	ret
+AddRec endp
 
 AddBrick proc
     push ax
@@ -731,9 +831,9 @@ Collisionwall proc
     mov cx, ballY
     
     checkLeftRight:
-		cmp bx, 25                      ;check if ball hits the left wall
+		cmp bx, 15                      ;check if ball hits the left wall
 		jl goRight
-		cmp bx, 290                     ;check if ball hits the right wall
+		cmp bx, 305                     ;check if ball hits the right wall
 		jg goLeft
 		jmp checkUpDown
 		
