@@ -13,7 +13,7 @@ EXTERNDELAY = 3
 	gamemode db 0
 	time db ' $'
 
-	tens db 37h
+	tens db 35h
 	ones db 39h
 	timeCtr db 0
 	
@@ -158,6 +158,7 @@ local check
 	mov begin, 0                        ;stop gameloop
 	redrawball 0
 	redrawStriker 0
+	mov scoreCount, 0
     call GameCompletedPage
     
     check:
@@ -410,6 +411,8 @@ menu proc
 	mov opt, 1
 	mov ballX, 158
 	mov ballY, 163
+	mov yloc, 129
+	mov timeCtr, 0
 
 	mov ah, 02h
 	mov bh, 00h
@@ -511,6 +514,8 @@ menu proc
 		je start_level
 		cmp opt, 2
 		je start_timed
+		cmp opt, 4
+		je terminate
 		
 	start_level:
 		mov begin, 1
@@ -523,6 +528,11 @@ menu proc
 		mov gamemode, 1
 		call timedmode
 		ret
+	
+	terminate:
+		call setVideoMode
+		mov ah, 4Ch
+		int 21h
 	
 	none:
 		ret
@@ -700,12 +710,10 @@ GameCompletedPage proc
 	drawTitle 191, 77, 6, 23, 5         ;draw !
     drawTitle 191, 104, 6, 5, 5
 	
-	mov lmenu, 1
-	
 	mov ah, 02h
     mov bh, 00h
-    mov dh, 0Fh
-    mov dl, 0Fh
+    mov dh, 11h
+    mov dl, 10h
     int 10h
     
     mov ah, 09h
@@ -714,14 +722,16 @@ GameCompletedPage proc
     
     mov ah, 02h
     mov bh, 00h
-    mov dh, 11h
-    mov dl, 0Fh
+    mov dh, 13h
+    mov dl, 12h
     int 10h
     
     mov ah, 09h
     lea dx, exit_text
     int 21h
     
+	mov lmenu, 1
+	mov yloc, 145
     call drawSelect
 	
 	selectCompleted:
@@ -747,10 +757,10 @@ GameCompletedPage proc
 		je selectCompleted
 		
 		upCompleted:
-			cmp opt, 1
+			cmp optCompleted, 1
 			je nextCompleted
 			
-			sub opt, 1
+			sub optCompleted, 1
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
@@ -759,18 +769,18 @@ GameCompletedPage proc
 		je selectCompleted
 			
 		backCompleted:
-			mov opt, 1
+			mov optCompleted, 1
 			call deleteSelect
-			mov yloc, 129          ;129 -> y location of first underline, varies
+			mov yloc, 145          ;129 -> y location of first underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
 		je selectCompleted
 		
 		nextCompleted:
-			mov opt, 2
+			mov optCompleted, 2
 			call deleteSelect
-			mov yloc, 145          ;177 -> y location of last underline, varies
+			mov yloc, 161          ;177 -> y location of last underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
@@ -780,10 +790,18 @@ GameCompletedPage proc
 		mov lmenu, 0
 		cmp optCompleted, 1
 		je backMain
+		cmp optCompleted, 2
+		je quit
 
 	backMain:
 		call StartPage
 		call menu
+		ret
+		
+	quit:
+		call setVideoMode
+		mov ah, 4Ch
+		int 21h
 		
 	pop ax 
 	pop bx
