@@ -9,6 +9,13 @@ EXTERNDELAY = 3
 	score db 'Score: $'
 	scoreCount dw 0
 	ending db ' $'
+	ctr db 0
+	gamemode db 0
+	time db ' $'
+
+	tens db 37h
+	ones db 39h
+	timeCtr db 0
 	
 	blockbuster_text db 'BLOCK BUSTER', '$'
 	start_text db 'Press S to start', '$'
@@ -19,12 +26,14 @@ EXTERNDELAY = 3
 	timedmode_text db 'TIMED MODE','$'
 	options_text db 'OPTIONS','$'
 	exit_text db 'EXIT','$'
-	arrow db '>>','$'
+	mainmenu_text db 'MAIN MENU', '$'
 
 	xloc dw 114
 	yloc dw 129
 	wid dw 90
 	opt db 1
+	optCompleted db 1
+	optOver db 1
 	lmenu db 1
 	
 	xlocRec dw 0
@@ -48,28 +57,25 @@ EXTERNDELAY = 3
 	strikerX dw 140                ;initial X location of the striker (paddle)
 	strikerY dw 170                ;initial Y location of the striker (paddle)
 	
-	boundaryEnd dw 290             ;ending boundary for the ball and striker
+	boundaryEnd dw 270             ;ending boundary for the ball and striker
 	boundaryStart dw 5             ;starting boundary for the ball and striker
 	
-	brick1x dw 87h                 ;X and Y locations of the bricks
-	brick1y dw 15h
-
-	brick2x dw 6Bh
-	brick2y dw 25h
-	brick3x dw 0A3h
-	brick3y dw 25h
-
-	brick4x dw 87h
-	brick4y dw 35h
-
-	brick5x dw 30h
-	brick5y dw 55h
-	brick6x dw 6Ah
-	brick6y dw 55h
-	brick7x dw 0A4h
-	brick7y dw 55h
-	brick8x dw 0DEh
-	brick8y dw 55h
+	brick1x dw 0                 ;X and Y locations of the bricks
+	brick1y dw 0
+	brick2x dw 0
+	brick2y dw 0
+	brick3x dw 0
+	brick3y dw 0
+	brick4x dw 0
+	brick4y dw 0
+	brick5x dw 0
+	brick5y dw 0
+	brick6x dw 0
+	brick6y dw 0
+	brick7x dw 0
+	brick7y dw 0
+	brick8x dw 0
+	brick8y dw 0
 	
 .code
 drawTitle macro x, y, w, h, c
@@ -82,12 +88,13 @@ drawTitle macro x, y, w, h, c
 	call AddRec
 endm
 
-BuildBrick macro  A, B
+BuildBrick macro  A, B, C
     push ax
     push bx
 	
     mov ax, A                           ;draw the X position of brick at A
     mov bx, B                           ;draw the Y position of brick at B
+	MOV color, C
     call AddBrick
 	
     pop bx
@@ -144,7 +151,7 @@ local check
     
     call switcher                       ;if ball hits a brick, change ball direction
     DestroyBrick X, Y                   ;destroy brick
-    mov Y, 300
+    mov Y, 300                          ;move the brick out of the way
     cmp scoreCount, 8                   ;check if all the bricks are destroyed
     jne check
 	
@@ -161,6 +168,7 @@ local check
 endm
 
 DestroyBrick macro  A, B
+local drawscore1
     push ax
     push bx
 	
@@ -169,8 +177,12 @@ DestroyBrick macro  A, B
     call RemoveBrick
     call beep     
     inc scoreCount
-    call DrawScores
 	
+	cmp gamemode, 0
+	je drawscore1
+	;call DrawScores
+	
+	drawscore1:
     pop bx
     pop ax
 endm
@@ -182,30 +194,118 @@ main proc
 	call setVideoMode                     ;clear screen
 	call StartPage                        ;initiate start page
 	call menu
-    call setVideoMode                      
-    call drawBoundary                     
-	
-    BuildBrick brick1x brick1y          ;draw bricks
-    BuildBrick brick2x brick2y
-    BuildBrick brick3x brick3y
-    BuildBrick brick4x brick4y
-    BuildSpecialBrick brick5x brick5y
-    BuildSpecialBrick brick6x brick6y
-    BuildSpecialBrick brick7x brick7y
-    BuildSpecialBrick brick8x brick8y
-	
-    redrawStriker 13                     ;draw paddle
-    redrawBall 15                        ;draw ball
-	
-    call DrawScores                      ;show score count
-    call gameLoop                        ;start gameplay
+	call setVideoMode
 main endp
 
-StartPage proc
-	mov ah, 0Bh
-	mov bh, 13h
-	mov bl, 00h
+printTime proc
+	push ax
+	push dx
+	push cx
+	
+	mov ah, 02h
+	mov dh, 00h
+	mov dl, 13h
 	int 10h
+	
+	show:
+	cmp ones, 2Fh
+	je tenths
+	
+	mov ah, 02h
+	mov dl, tens
+	int 21h
+	
+	mov ah, 02h
+	mov dl, ones
+	int 21h
+	
+	mov cx, 02
+	backspace:
+	mov ah, 02h         ;backspace (delete ones
+	mov dl, 8h
+	int 21h
+	dec cx
+	jnz backspace
+	
+	pop cx
+	pop ax
+	pop dx
+	ret
+	
+	tenths:
+	dec tens
+	mov ones, 39h
+	jmp show
+printTime endp
+
+levelmode proc
+	call setVideoMode
+	call drawBoundary
+	call levelOne
+	call BuildB
+	redrawStriker 13
+	redrawBall 15
+	call gameLoop
+	ret
+levelmode endp
+
+timedmode proc
+	call setVideoMode
+	call drawBoundary
+	call levelOne
+	call BuildB
+	redrawStriker 13
+	redrawBall 15
+	call gameLoop
+	ret
+timedmode endp
+
+BuildB proc	
+	BuildBrick Brick1x, Brick1y, 9
+	BuildBrick Brick2x, Brick2y, 9
+	BuildBrick Brick3x, Brick3y, 9
+	BuildBrick Brick4x, Brick4y, 9
+	BuildBrick Brick5x, Brick5y, 12
+	BuildBrick Brick6x, Brick6y, 12
+	BuildBrick Brick7x, Brick7y, 12
+	BuildBrick Brick8x, Brick8y, 12
+	ret
+BuildB endp
+
+CollideB proc
+	BrickCollision Brick1x, Brick1y
+    BrickCollision Brick2x, Brick2y
+    BrickCollision Brick3x, Brick3y
+    BrickCollision Brick4x, Brick4y
+    BrickCollision Brick5x, Brick5y
+    BrickCollision Brick6x, Brick6y 
+    BrickCollision Brick7x, Brick7y
+    BrickCollision Brick8x, Brick8y
+	ret
+CollideB endp
+
+levelOne proc
+	mov Brick1x, 87h
+	mov Brick1y, 15h
+	mov brick2x, 6Bh
+	mov brick2y, 25h
+	mov brick3x, 0A3h
+	mov brick3y, 25h
+	mov brick4x, 87h
+	mov brick4y, 35h
+	mov brick5x, 30h
+	mov brick5y, 55h
+	mov brick6x, 6Ah
+	mov brick6y, 55h
+	mov brick7x, 0A4h
+	mov brick7y, 55h
+	mov brick8x, 0DEh
+	mov brick8y, 55h
+	ret
+levelOne endp
+
+StartPage proc
+	call setVideoMode
 
 	drawTitle 99, 20, 24, 4, 13         ;draw B shadow
 	drawTitle 99, 49, 24, 4, 13
@@ -306,6 +406,11 @@ StartPage proc
 StartPage endp
 
 menu proc
+	mov lmenu, 1
+	mov opt, 1
+	mov ballX, 158
+	mov ballY, 163
+
 	mov ah, 02h
 	mov bh, 00h
 	mov dh, 0Fh
@@ -403,12 +508,20 @@ menu proc
 	selected1:
 		mov lmenu, 0
 		cmp opt, 1
-		je start_game1
+		je start_level
 		cmp opt, 2
-		je none
+		je start_timed
 		
-	start_game1:
+	start_level:
 		mov begin, 1
+		mov gamemode, 0
+		call levelmode
+		ret
+	
+	start_timed:
+		mov begin, 1
+		mov gamemode, 1
+		call timedmode
 		ret
 	
 	none:
@@ -450,22 +563,25 @@ deleteSelect proc
 deleteSelect endp
 
 repeat:
-gameLoop:        
-   call checkKeyboard                   ;check keyboard inputs
-   cmp begin, 1                         ;check if game is set to start
-   jne repeat                           ;restart game loop if begin = 0
+gameLoop:   
+	inc timeCtr
+	call checkKeyboard                   ;check keyboard inputs
+	cmp begin, 1                         ;check if game is set to start
+	jne repeat                           ;restart game loop if begin = 0
    
+   cmp gamemode, 0
+   je none1
+   
+   cmp timeCtr, 100
+   jne none1
+   dec ones
+   mov timeCtr, 0
+   call printTime
+   
+   none1:
    call Collisionwall                   ;check if ball hits walls
    call CollisionStriker                ;check if ball hits striker
-   BrickCollision Brick1x, Brick1y      ;check if ball hits the bricks
-   BrickCollision Brick2x, Brick2y
-   BrickCollision Brick3x, Brick3y
-   BrickCollision Brick4x, Brick4y
-   BrickCollision Brick5x, Brick5y
-   BrickCollision Brick6x, Brick6y 
-   BrickCollision Brick7x, Brick7y
-   BrickCollision Brick8x, Brick8y
-
+   call CollideB
    call ballMove                        ;ball movement
    call sleep                           ;continue the gameloop
    jmp gameLoop                         ;loop the game
@@ -530,24 +646,148 @@ setVideoMode proc
     mov al, 13h 
     int 10h     
     
+	mov ah, 0Bh
+	mov bh, 13h
+	mov bl, 00h
+	int 10h
+	
     ret
 setVideoMode endp
 
 GameCompletedPage proc
+	push ax
+	push bx
+	push dx
+	
 	call setVideoMode
 	
+	drawTitle 67, 24, 5, 19, 5          ;draw Y
+    drawTitle 73, 37, 13, 6, 5
+    drawTitle 87, 24, 5, 19, 5
+    drawTitle 77, 44, 6, 13, 5 
+	
+	drawTitle 98, 24, 6, 33, 5          ;draw O
+    drawTitle 115, 24, 4, 33, 5
+    drawTitle 120, 24, 0, 32, 5
+    drawTitle 105, 24, 9, 6, 5
+    drawTitle 105, 52, 9, 5, 5 
+
+	drawTitle 127, 24, 6, 33, 5         ;draw U
+    drawTitle 144, 24, 6, 33, 5
+    drawTitle 127, 52, 23, 6, 5
+	
+	drawTitle 168, 24, 5, 33, 5         ;draw D
+    drawTitle 174, 24, 14, 6, 5
+    drawTitle 174, 52, 14, 5, 5
+    drawTitle 184, 28, 6, 27, 5  
+	
+	drawTitle 197, 24, 23, 6, 5         ;draw I
+    drawTitle 197, 52, 23, 5, 5
+    drawTitle 206, 31, 6, 20, 5
+	
+	drawTitle 227, 24, 5, 33, 5         ;draw D
+    drawTitle 233, 24, 14, 6, 5
+    drawTitle 233, 52, 14, 5, 5
+    drawTitle 243, 28, 6, 27, 5 
+	
+	drawTitle 130, 77, 23, 6, 5         ;draw I
+    drawTitle 130, 104, 23, 5, 5
+    drawTitle 139, 83, 6, 20, 5 
+	
+	drawTitle 159, 77, 26, 6, 5         ;draw T
+    drawTitle 169, 84, 6, 25, 5
+	
+	drawTitle 191, 77, 6, 23, 5         ;draw !
+    drawTitle 191, 104, 6, 5, 5
+	
+	mov lmenu, 1
+	
 	mov ah, 02h
-	mov bh, 00h
-	mov dh, 0Ah
-	mov dl, 0Ch
-	int 10h
+    mov bh, 00h
+    mov dh, 0Fh
+    mov dl, 0Fh
+    int 10h
+    
+    mov ah, 09h
+    lea dx, mainmenu_text
+    int 21h
+    
+    mov ah, 02h
+    mov bh, 00h
+    mov dh, 11h
+    mov dl, 0Fh
+    int 10h
+    
+    mov ah, 09h
+    lea dx, exit_text
+    int 21h
+    
+    call drawSelect
 	
-	mov ah, 09h
-	lea dx, gamecompleted_text
-	int 21h
-	
-	mov ah, 00h
-	int 16h
+	selectCompleted:
+		mov ah, 00h                ;read keyboard input
+		int 16h
+		cmp ax, 4800h              ;up arrow key 
+		je upCompleted
+		cmp ax, 5000h              ;down arrow key
+		je downCompleted
+		cmp ax, 1C0Dh              ;enter key
+		je selectedCompleted
+		
+		downCompleted:
+			cmp optCompleted, 2             ;4 -> number of buttons, varies
+			je backCompleted
+			
+			add optCompleted, 1
+			call deleteSelect
+			add yloc, 16           
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectCompleted
+		
+		upCompleted:
+			cmp opt, 1
+			je nextCompleted
+			
+			sub opt, 1
+			call deleteSelect
+			sub yloc, 16
+			call drawSelect
+			
+		cmp lmenu, 1
+		je selectCompleted
+			
+		backCompleted:
+			mov opt, 1
+			call deleteSelect
+			mov yloc, 129          ;129 -> y location of first underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectCompleted
+		
+		nextCompleted:
+			mov opt, 2
+			call deleteSelect
+			mov yloc, 145          ;177 -> y location of last underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectCompleted
+		
+	selectedCompleted:
+		mov lmenu, 0
+		cmp optCompleted, 1
+		je backMain
+
+	backMain:
+		call StartPage
+		call menu
+		
+	pop ax 
+	pop bx
+	pop dx
 	ret
 GameCompletedPage endp
 
@@ -600,7 +840,6 @@ AddBrick proc
     push bx    
 	
     mov startx, ax                      ;draw brick width
-    mov color, 9                        ;set brick color to light blue
     mov ax, bx
     mov bx, startx
     add bx, 35                          ;add brick width
