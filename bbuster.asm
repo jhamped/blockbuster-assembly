@@ -36,9 +36,9 @@ EXTERNDELAY = 3
 	level4_text db 'LEVEL 4', '$'
 	level5_text db 'LEVEL 5', '$'
 
-	xloc dw 152
+	xloc dw 145
 	yloc dw 129
-	wid dw 15
+	wid dw 25
 	opt db 1
 	optCompleted db 1
 	optOver db 1
@@ -342,9 +342,9 @@ levelMenu proc
 	int 21h
 	
 	mov lmenu, 1
-	mov xloc, 121
+	mov xloc, 142
 	mov yloc, 73
-	mov wid, 66
+	mov wid, 20
 	call drawSelect                ;draw underline
 
 	selectLevel:
@@ -391,7 +391,7 @@ levelMenu proc
 		je selectLevel 
 		
 		nextLevel:
-			mov optLevel, 5
+			mov optLevel, 6
 			call deleteSelect
 			mov yloc, 153          ;165 -> y location of last underline, varies
 			call drawSelect
@@ -401,9 +401,17 @@ levelMenu proc
 		
 	selectedLevel:
 		mov lmenu, 0
-		cmp optTimed, 6
+		cmp optLevel, 1
+		je level1
+		cmp optLevel, 6
 		je backMenu
 		
+	level1:
+		mov begin, 1
+		mov gamemode, 0
+		call levelmode
+		ret
+	
 	backMenu:
 		call StartPage
 		call menu
@@ -503,9 +511,9 @@ timedMenu proc
 	int 21h
 	
 	mov lmenu, 1
-	mov xloc, 121
+	mov xloc, 142
 	mov yloc, 73
-	mov wid, 66
+	mov wid, 20
 	call drawSelect                ;draw underline
 
 	selectTimed:
@@ -552,7 +560,7 @@ timedMenu proc
 		je selectTimed
 		
 		nextTimed:
-			mov optTimed, 5
+			mov optTimed, 6
 			call deleteSelect
 			mov yloc, 153          ;165 -> y location of last underline, varies
 			call drawSelect
@@ -562,8 +570,16 @@ timedMenu proc
 		
 	selectedTimed:
 		mov lmenu, 0
+		cmp optTimed, 1
+		je timed1
 		cmp optTimed, 6
 		je backMenu1
+		
+	timed1:
+		mov begin, 1
+		mov gamemode, 1
+		call timedmode
+		ret
 		
 	backMenu1:
 		call StartPage
@@ -748,7 +764,9 @@ menu proc
 	mov ballLeft, 1
 	mov ballUp, 1
 	mov strikerY, 170
+	mov xloc, 145
 	mov yloc, 129
+	mov wid, 25
 	mov timeCtr, 0
 
 	mov ah, 02h
@@ -856,9 +874,7 @@ menu proc
 		
 	start_level:
 		call levelMenu
-		;mov begin, 1
-		;mov gamemode, 0
-		;call levelmode
+		
 		ret
 	
 	start_timed:
@@ -1070,7 +1086,9 @@ GameCompletedPage proc
     int 21h
     
 	mov lmenu, 1
+	mov xloc, 145
 	mov yloc, 145
+	mov wid, 25
     call drawSelect
 	
 	selectCompleted:
@@ -1149,21 +1167,161 @@ GameCompletedPage proc
 GameCompletedPage endp
 
 GameOverPage proc
+	push ax
+	push bx
+	push dx
+	
 	call setVideoMode
+	
+	; draw G
+	    
+	drawTitle 91, 17, 30, 6, 5       
+	drawTitle 115, 23, 6, 6, 5 
+	drawTitle 91, 23, 6, 35, 5 
+	drawTitle 97, 52, 25, 6, 5 
+	drawTitle 107, 38, 15, 6, 5 
+	drawTitle 116, 44, 6, 8, 5 
 
+    ; draw A
+    drawTitle 127, 17, 6, 41, 5 
+    drawTitle 133, 17, 18, 6, 5 
+	drawTitle 152, 17, 6, 41, 5 
+	drawTitle 133, 35, 18, 6, 5 
+
+	; draw M
+    drawTitle 163, 17, 6, 41, 5 
+    drawTitle 169, 17, 18, 6, 5 
+	drawTitle 175, 23, 6, 18, 5 
+	drawTitle 188, 17, 6, 41, 5 
+
+	; draw E
+    drawTitle 199, 17, 6, 41, 5 
+    drawTitle 205, 17, 25, 6, 5 
+	drawTitle 205, 34, 22, 6, 5 
+	drawTitle 205, 52, 25, 6, 5 
+    
+	; draw O
+    drawTitle 91, 63, 6, 41, 5 
+    drawTitle 97, 63, 19, 6, 5 
+	drawTitle 116, 63, 6, 41, 5 
+	drawTitle 97, 98, 19, 6, 5 
+	
+	; draw V
+    drawTitle 127, 63, 6, 35, 5 
+    drawTitle 152, 63, 6, 35, 5 
+	drawTitle 133, 98, 19, 6, 5 
+
+	; draw E
+    drawTitle 163, 63, 6, 41, 5 
+    drawTitle 169, 63, 25, 6, 5 
+	drawTitle 169, 80, 22, 6, 5 
+	drawTitle 169, 98, 25, 6, 5 
+
+	; draw R
+    drawTitle 199, 63, 6, 41, 5 
+    drawTitle 205, 63, 19, 6, 5 
+	drawTitle 205, 79, 19, 6, 5 
+	drawTitle 224, 69, 6, 10, 5 
+	drawTitle 224, 85, 6, 18, 5 
+	
 	mov ah, 02h
-	mov bh, 00h
-	mov dh, 0Ah
-	mov dl, 10h
-	int 10h
+    mov bh, 00h
+    mov dh, 13h
+    mov dl, 10h
+    int 10h
+    
+    mov ah, 09h
+    lea dx, mainmenu_text
+    int 21h
+    
+    mov ah, 02h
+    mov bh, 00h
+    mov dh, 15h
+    mov dl, 12h
+    int 10h
+    
+    mov ah, 09h
+    lea dx, exit_text
+    int 21h
+    
+	mov lmenu, 1
+	mov xloc, 145
+	mov yloc, 145
+	mov wid, 25
+    call drawSelect
 	
-	mov ah, 09h
-	lea dx, gameover_text
-	int 21h
-	
-	mov ah, 00h
-	int 16h
-	
+	selectOver:
+		mov ah, 00h                ;read keyboard input
+		int 16h
+		cmp ax, 4800h              ;up arrow key 
+		je upOver
+		cmp ax, 5000h              ;down arrow key
+		je downOver
+		cmp ax, 1C0Dh              ;enter key
+		je selectedOver
+		
+		downOver:
+			cmp optOver, 2             ;4 -> number of buttons, varies
+			je backOver
+			
+			add optOver, 1
+			call deleteSelect
+			add yloc, 16           
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectOver
+		
+		upOver:
+			cmp optOver, 1
+			je nextOver
+			
+			sub optOver, 1
+			call deleteSelect
+			sub yloc, 16
+			call drawSelect
+			
+		cmp lmenu, 1
+		je selectOver
+			
+		backOver:
+			mov optOver, 1
+			call deleteSelect
+			mov yloc, 161          ;129 -> y location of first underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectOver
+		
+		nextOver:
+			mov optOver, 2
+			call deleteSelect
+			mov yloc, 177          ;177 -> y location of last underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectOver
+		
+	selectedOver:
+		mov lmenu, 0
+		cmp optOver, 1
+		je backMain1
+		cmp optOver, 2
+		je quit1
+
+	backMain1:
+		call StartPage
+		call menu
+		ret
+		
+	quit1:
+		call setVideoMode
+		mov ah, 4Ch
+		int 21h
+		
+	pop ax 
+	pop bx
+	pop dx
 	ret
 GameOverPage endp
 
