@@ -12,6 +12,7 @@ EXTERNDELAY = 3
 	ctr db 0
 	gamemode db 0
 	time db ' $'
+	soundOn db 1
 
 	tens db 35h
 	ones db 39h
@@ -27,13 +28,22 @@ EXTERNDELAY = 3
 	options_text db 'OPTIONS','$'
 	exit_text db 'EXIT','$'
 	mainmenu_text db 'MAIN MENU', '$'
+	back_text db 'BACK', '$'
+	
+	level1_text db 'LEVEL 1', '$'
+	level2_text db 'LEVEL 2', '$'
+	level3_text db 'LEVEL 3', '$'
+	level4_text db 'LEVEL 4', '$'
+	level5_text db 'LEVEL 5', '$'
 
-	xloc dw 114
+	xloc dw 152
 	yloc dw 129
-	wid dw 90
+	wid dw 15
 	opt db 1
 	optCompleted db 1
 	optOver db 1
+	optLevel db 1
+	optTimed db 1
 	lmenu db 1
 	
 	xlocRec dw 0
@@ -137,15 +147,16 @@ local check
     
     cmp dx, ballY                       ;check if ball hits the brick
     jl check
+	
     sub dx, 7
-  
     cmp ballY, dx
     jl check
     
     mov dx, X 
     cmp ballX, dx
     jl check
-    add dx, 36
+	
+    add dx, 37
     cmp dx, ballX
     jl check
     
@@ -169,19 +180,22 @@ local check
 endm
 
 DestroyBrick macro  A, B
-local drawscore1
+local drawscore1, noSound
     push ax
     push bx
 	
     mov ax, A                           ;remove brick located at x-position A
     mov bx, B                           ;remove brick located at y-position B
     call RemoveBrick
-    call beep     
-    inc scoreCount
 	
+	cmp soundOn, 1
+	jne noSound
+    call beep     
+	
+	noSound:
+    inc scoreCount
 	cmp gamemode, 0
 	je drawscore1
-	;call DrawScores
 	
 	drawscore1:
     pop bx
@@ -204,7 +218,7 @@ printTime proc
 	push cx
 	
 	mov ah, 02h
-	mov dh, 00h
+	mov dh, 01h
 	mov dl, 13h
 	int 10h
 	
@@ -250,6 +264,156 @@ levelmode proc
 	ret
 levelmode endp
 
+levelMenu proc
+	push ax
+	push bx
+	push dx
+	
+	call setVideoMode
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 04h
+	mov dl, 0Fh
+	int 10h
+	
+	mov ah, 09h
+	lea dx, levelmode_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 08h
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level1_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Ah
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level2_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Ch
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level3_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Eh
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level4_text
+	int 21h
+
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 10h
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level5_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 12h
+	mov dl, 11h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, back_text
+	int 21h
+	
+	mov lmenu, 1
+	mov xloc, 121
+	mov yloc, 73
+	mov wid, 66
+	call drawSelect                ;draw underline
+
+	selectLevel:
+		mov ah, 00h                ;read keyboard input
+		int 16h
+		cmp ax, 4800h              ;up arrow key 
+		je upLevel
+		cmp ax, 5000h              ;down arrow key
+		je downLevel
+		cmp ax, 1C0Dh              ;enter key
+		je selectedLevel
+		
+		downLevel:
+			cmp optLevel, 6             ;5 -> number of buttons, varies
+			je backLevel
+			
+			add optLevel, 1
+			call deleteSelect
+			add yloc, 16           
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectLevel
+		
+		upLevel:
+			cmp optLevel, 1
+			je nextLevel
+			
+			sub optLevel, 1
+			call deleteSelect
+			sub yloc, 16
+			call drawSelect
+			
+		cmp lmenu, 1
+		je selectLevel
+			
+		backLevel:
+			mov optLevel, 1
+			call deleteSelect
+			mov yloc, 73          ;105 -> y location of first underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectLevel 
+		
+		nextLevel:
+			mov optLevel, 5
+			call deleteSelect
+			mov yloc, 153          ;165 -> y location of last underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectLevel
+		
+	selectedLevel:
+		mov lmenu, 0
+		cmp optTimed, 6
+		je backMenu
+		
+	backMenu:
+		call StartPage
+		call menu
+		ret 
+	
+	pop ax
+	pop bx
+	pop dx
+levelMenu endp
+
 timedmode proc
 	call setVideoMode
 	call drawBoundary
@@ -261,142 +425,312 @@ timedmode proc
 	ret
 timedmode endp
 
+timedMenu proc
+	push ax
+	push bx
+	push dx
+	
+	call setVideoMode
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 04h
+	mov dl, 0Fh
+	int 10h
+	
+	mov ah, 09h
+	lea dx, timedmode_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 08h
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level1_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Ah
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level2_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Ch
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level3_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Eh
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level4_text
+	int 21h
+
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 10h
+	mov dl, 10h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, level5_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 12h
+	mov dl, 11h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, back_text
+	int 21h
+	
+	mov lmenu, 1
+	mov xloc, 121
+	mov yloc, 73
+	mov wid, 66
+	call drawSelect                ;draw underline
+
+	selectTimed:
+		mov ah, 00h                ;read keyboard input
+		int 16h
+		cmp ax, 4800h              ;up arrow key 
+		je upTimed
+		cmp ax, 5000h              ;down arrow key
+		je downTimed
+		cmp ax, 1C0Dh              ;enter key
+		je selectedTimed
+		
+		downTimed:
+			cmp optTimed, 6             ;5 -> number of buttons, varies
+			je backTimed
+			
+			add optTimed, 1
+			call deleteSelect
+			add yloc, 16           
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectTimed
+		
+		upTimed:
+			cmp optTimed, 1
+			je nextTimed
+			
+			sub optTimed, 1
+			call deleteSelect
+			sub yloc, 16
+			call drawSelect
+			
+		cmp lmenu, 1
+		je selectTimed
+			
+		backTimed:
+			mov optTimed, 1
+			call deleteSelect
+			mov yloc, 73          ;105 -> y location of first underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectTimed
+		
+		nextTimed:
+			mov optTimed, 5
+			call deleteSelect
+			mov yloc, 153          ;165 -> y location of last underline, varies
+			call drawSelect
+		
+		cmp lmenu, 1
+		je selectTimed
+		
+	selectedTimed:
+		mov lmenu, 0
+		cmp optTimed, 6
+		je backMenu1
+		
+	backMenu1:
+		call StartPage
+		call menu
+		ret
+		
+	pop ax
+	pop bx
+	pop dx
+timedMenu endp
+
 BuildB proc	
-	BuildBrick Brick1x, Brick1y, 9
-	BuildBrick Brick2x, Brick2y, 9
-	BuildBrick Brick3x, Brick3y, 9
-	BuildBrick Brick4x, Brick4y, 9
-	BuildBrick Brick5x, Brick5y, 12
-	BuildBrick Brick6x, Brick6y, 12
-	BuildBrick Brick7x, Brick7y, 12
-	BuildBrick Brick8x, Brick8y, 12
+	BuildBrick brick1x, brick1y, 9
+	BuildBrick brick2x, brick2y, 9
+	BuildBrick brick3x, brick3y, 9
+	BuildBrick brick4x, brick4y, 9
+	BuildBrick brick5x, brick5y, 12
+	BuildBrick brick6x, brick6y, 12
+	BuildBrick brick7x, brick7y, 12
+	BuildBrick brick8x, brick8y, 12
 	ret
 BuildB endp
 
 CollideB proc
-	BrickCollision Brick1x, Brick1y
-    BrickCollision Brick2x, Brick2y
-    BrickCollision Brick3x, Brick3y
-    BrickCollision Brick4x, Brick4y
-    BrickCollision Brick5x, Brick5y
-    BrickCollision Brick6x, Brick6y 
-    BrickCollision Brick7x, Brick7y
-    BrickCollision Brick8x, Brick8y
+	BrickCollision brick1x, brick1y
+	BrickCollision brick2x, brick2y
+	BrickCollision brick3x, brick3y
+	BrickCollision brick4x, brick4y
+	BrickCollision brick5x, brick5y
+	BrickCollision brick6x, brick6y
+	BrickCollision brick7x, brick7y
+	BrickCollision brick8x, brick8y
 	ret
 CollideB endp
 
 levelOne proc
-	mov Brick1x, 87h
-	mov Brick1y, 15h
-	mov brick2x, 6Bh
-	mov brick2y, 25h
-	mov brick3x, 0A3h
-	mov brick3y, 25h
-	mov brick4x, 87h
-	mov brick4y, 35h
-	mov brick5x, 30h
-	mov brick5y, 55h
-	mov brick6x, 6Ah
-	mov brick6y, 55h
-	mov brick7x, 0A4h
-	mov brick7y, 55h
-	mov brick8x, 0DEh
-	mov brick8y, 55h
+	mov brick1x, 88h
+	mov brick1y, 16h
+	mov brick2x, 6Dh
+	mov brick2y, 26h
+	mov brick3x, 0A5h
+	mov brick3y, 26h
+	mov brick4x, 89h
+	mov brick4y, 36h
+	mov brick5x, 32h
+	mov brick5y, 56h
+	mov brick6x, 6Ch
+	mov brick6y, 56h
+	mov brick7x, 0A6h
+	mov brick7y, 56h
+	mov brick8x, 0E0h
+	mov brick8y, 56h
 	ret
 levelOne endp
+
+levelTwo proc
+	mov brick1x, 89h
+	mov brick1y, 16h
+	mov brick2x, 6Dh
+	mov brick2y, 26h
+	mov brick3x, 0A5h
+	mov brick3y, 26h
+	mov brick4x, 89h
+	mov brick4y, 36h
+	mov brick5x, 32h
+	mov brick5y, 56h
+	mov brick6x, 6Ch
+	mov brick6y, 56h
+	mov brick7x, 0A6h
+	mov brick7y, 56h
+	mov brick8x, 0E0h
+	mov brick8y, 56h
+	ret
+levelTwo endp
 
 StartPage proc
 	call setVideoMode
 
-	drawTitle 99, 20, 24, 4, 13         ;draw B shadow
-	drawTitle 99, 49, 24, 4, 13
-	drawTitle 120, 20, 4, 32, 13
-	drawTitle 103, 20, 4, 32, 13
-	drawTitle 103, 35, 20, 4, 13
+	drawTitle 100, 21, 24, 4, 13         ;draw B shadow
+	drawTitle 100, 50, 24, 4, 13
+	drawTitle 121, 21, 4, 32, 13
+	drawTitle 104, 21, 4, 32, 13
+	drawTitle 104, 36, 20, 4, 13
 	drawTitle 98, 19, 24, 4, 5          ;draw B
 	drawTitle 98, 48, 24, 4, 5
 	drawTitle 119, 19, 4, 32, 5
 	drawTitle 102, 19, 4, 32, 5
 	drawTitle 102, 34, 20, 4, 5
 
-	drawTitle 131, 20, 4, 32, 13        ;draw L shadow
-	drawTitle 131, 49, 16, 4, 13
+	drawTitle 132, 21, 4, 32, 13        ;draw L shadow
+	drawTitle 132, 50, 16, 4, 13
 	drawTitle 130, 19, 4, 32, 5         ;draw L
 	drawTitle 130, 48, 16, 4, 5
 	
-	drawTitle 153, 20, 21, 4, 13        ;draw O shadow
-	drawTitle 153, 49, 21, 4, 13
-	drawTitle 153, 20, 4, 32, 13
-	drawTitle 171, 20, 4, 32, 13
+	drawTitle 154, 21, 21, 4, 13        ;draw O shadow
+	drawTitle 154, 50, 21, 4, 13
+	drawTitle 154, 21, 4, 32, 13
+	drawTitle 172, 21, 4, 32, 13
 	drawTitle 152, 19, 21, 4, 5         ;draw O
 	drawTitle 152, 48, 21, 4, 5
 	drawTitle 152, 19, 4, 32, 5
 	drawTitle 170, 19, 4, 32, 5
 	
-	drawTitle 181, 20, 18, 4, 13        ;draw C shadow
-	drawTitle 181, 49, 18, 4, 13
-	drawTitle 181, 20, 4, 32, 13
+	drawTitle 182, 21, 18, 4, 13        ;draw C shadow
+	drawTitle 182, 50, 18, 4, 13
+	drawTitle 182, 21, 4, 32, 13
 	drawTitle 180, 19, 18, 4, 5         ;draw C
 	drawTitle 180, 48, 18, 4, 5
 	drawTitle 180, 19, 4, 32, 5
 	
-	drawTitle 205, 20, 4, 33, 13        ;draw K shadow
-	drawTitle 205, 33, 20, 4, 13
-	drawTitle 219, 20, 4, 16, 13
-	drawTitle 222, 33, 4, 20, 13
+	drawTitle 206, 21, 4, 33, 13        ;draw K shadow
+	drawTitle 206, 34, 20, 4, 13
+	drawTitle 220, 21, 4, 16, 13
+	drawTitle 223, 34, 4, 20, 13
 	drawTitle 204, 19, 4, 33, 5         ;draw K
 	drawTitle 204, 32, 20, 4, 5
 	drawTitle 218, 19, 4, 16, 5
 	drawTitle 221, 32, 4, 20, 5
 	
-	drawTitle 83, 66, 25, 4, 13         ;draw B shadow
-	drawTitle 83, 96, 25, 4, 13
-	drawTitle 105, 66, 4, 33, 13
-	drawTitle 87, 66, 4, 33, 13
-	drawTitle 87, 82, 21, 4, 13
+	drawTitle 84, 67, 25, 4, 13         ;draw B shadow
+	drawTitle 84, 97, 25, 4, 13
+	drawTitle 106, 67, 4, 33, 13
+	drawTitle 88, 67, 4, 33, 13
+	drawTitle 88, 83, 21, 4, 13
 	drawTitle 82, 65, 25, 4, 5          ;draw B
 	drawTitle 82, 95, 25, 4, 5
 	drawTitle 104, 65, 4, 33, 5
 	drawTitle 86, 65, 4, 33, 5
 	drawTitle 86, 81, 21, 4, 5
 	
-	drawTitle 115, 66, 4, 33, 13        ;draw U shadow
-	drawTitle 133, 66, 4, 33, 13
-	drawTitle 115, 96, 21, 4, 13
+	drawTitle 116, 67, 4, 33, 13        ;draw U shadow
+	drawTitle 134, 67, 4, 33, 13
+	drawTitle 116, 97, 21, 4, 13
 	drawTitle 114, 65, 4, 33, 5         ;draw U
 	drawTitle 132, 65, 4, 33, 5
 	drawTitle 114, 95, 21, 4, 5
 	
-	drawTitle 145, 66, 18, 4, 13         ;draw S shadow
-	drawTitle 145, 96, 17, 4, 13
-	drawTitle 145, 66, 4, 16, 13
-	drawTitle 159, 80, 4, 20, 13
-	drawTitle 145, 80, 17, 4, 13
+	drawTitle 146, 67, 18, 4, 13         ;draw S shadow
+	drawTitle 146, 97, 17, 4, 13
+	drawTitle 146, 67, 4, 16, 13
+	drawTitle 160, 81, 4, 20, 13
+	drawTitle 146, 81, 17, 4, 13
 	drawTitle 144, 65, 18, 4, 5          ;draw S
 	drawTitle 144, 95, 17, 4, 5
 	drawTitle 144, 65, 4, 16, 5
 	drawTitle 158, 79, 4, 20, 5
 	drawTitle 144, 79, 17, 4, 5
 	
-	drawTitle 170, 66, 21, 4, 13        ;draw T shadow
-	drawTitle 179, 66, 4, 34, 13
+	drawTitle 171, 67, 21, 4, 13        ;draw T shadow
+	drawTitle 180, 67, 4, 34, 13
 	drawTitle 169, 65, 21, 4, 5         ;draw T 
 	drawTitle 178, 65, 4, 34, 5
 	
-	drawTitle 197, 66, 4, 33, 13        ;draw E shadow
-	drawTitle 197, 66, 18, 4, 13
-	drawTitle 197, 82, 16, 4, 13
-	drawTitle 197, 96, 18, 4, 13
+	drawTitle 198, 67, 4, 33, 13        ;draw E shadow
+	drawTitle 198, 67, 18, 4, 13
+	drawTitle 198, 83, 16, 4, 13
+	drawTitle 198, 97, 18, 4, 13
 	drawTitle 196, 65, 4, 33, 5         ;draw E
 	drawTitle 196, 65, 18, 4, 5
 	drawTitle 196, 81, 16, 4, 5
 	drawTitle 196, 95, 18, 4, 5
 	
-	drawTitle 221, 66, 4, 34, 13         ;draw R shadow
-	drawTitle 221, 66, 22, 4, 13
-	drawTitle 221, 81, 22, 4, 13
-	drawTitle 240, 66, 4, 18, 13
-	drawTitle 236, 81, 4, 19, 13
+	drawTitle 222, 67, 4, 34, 13         ;draw R shadow
+	drawTitle 222, 67, 22, 4, 13
+	drawTitle 222, 82, 22, 4, 13
+	drawTitle 241, 67, 4, 18, 13
+	drawTitle 237, 82, 4, 19, 13
 	drawTitle 220, 65, 4, 34, 5         ;draw R
 	drawTitle 220, 65, 22, 4, 5
 	drawTitle 220, 80, 22, 4, 5
@@ -411,6 +745,9 @@ menu proc
 	mov opt, 1
 	mov ballX, 158
 	mov ballY, 163
+	mov ballLeft, 1
+	mov ballUp, 1
+	mov strikerY, 170
 	mov yloc, 129
 	mov timeCtr, 0
 
@@ -518,15 +855,17 @@ menu proc
 		je terminate
 		
 	start_level:
-		mov begin, 1
-		mov gamemode, 0
-		call levelmode
+		call levelMenu
+		;mov begin, 1
+		;mov gamemode, 0
+		;call levelmode
 		ret
 	
 	start_timed:
-		mov begin, 1
-		mov gamemode, 1
-		call timedmode
+		call timedMenu
+		;mov begin, 1
+		;mov gamemode, 1
+		;call timedmode
 		ret
 	
 	terminate:
