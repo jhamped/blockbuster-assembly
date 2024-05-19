@@ -43,7 +43,6 @@ EXTERNDELAY = 3
 	optCompleted db 1
 	optOver db 1
 	optLevel db 1
-	optTimed db 1
 	lmenu db 1
 	
 	xlocRec dw 0
@@ -55,7 +54,7 @@ EXTERNDELAY = 3
 	ballX dw 158                   ;initial X location of ball
 	ballLeft db 1                  ;left movement of ball
 	ballUp db 1	                   ;up movement of ball
-	innerDelay db 0                ;movement of the ball
+	innerDelay db 0                ;speed of the ball
 	
 	color db 0	                   ;brick color
 	startx dw 0	                   ;starting X location of multiple elements
@@ -265,6 +264,12 @@ levelmode proc
 	je level1Game
 	cmp optLevel, 2
 	je level2Game
+	cmp optLevel, 3
+	je level3Game
+	cmp optLevel, 4
+	je level4Game
+	cmp optLevel, 5
+	je level5Game
 
 	level1Game:
 		call levelOne
@@ -272,6 +277,18 @@ levelmode proc
 	
 	level2Game:
 		call levelTwo
+		jmp next
+	
+	level3Game:
+		call levelThree
+		jmp next
+		
+	level4Game:
+		call levelFour
+		jmp next
+		
+	level5Game:
+		call levelFive
 		jmp next
 
 	next:
@@ -359,6 +376,7 @@ levelMenu proc
 	lea dx, back_text
 	int 21h
 	
+	mov optLevel, 1
 	mov lmenu, 1
 	mov xloc, 142
 	mov yloc, 73
@@ -421,8 +439,8 @@ levelMenu proc
 		mov lmenu, 0
 		cmp optLevel, 6
 		je backMenu
-		cmp optLevel, 6
-		jne level1
+		;cmp optLevel, 6
+		;jne level1
 		
 	level1:
 		mov begin, 1
@@ -528,6 +546,7 @@ timedMenu proc
 	lea dx, back_text
 	int 21h
 	
+	mov optLevel, 1
 	mov lmenu, 1
 	mov xloc, 142
 	mov yloc, 73
@@ -545,10 +564,10 @@ timedMenu proc
 		je selectedTimed
 		
 		downTimed:
-			cmp optTimed, 6             ;5 -> number of buttons, varies
+			cmp optLevel, 6             ;5 -> number of buttons, varies
 			je backTimed
 			
-			add optTimed, 1
+			add optLevel, 1
 			call deleteSelect
 			add yloc, 16           
 			call drawSelect
@@ -557,10 +576,10 @@ timedMenu proc
 		je selectTimed
 		
 		upTimed:
-			cmp optTimed, 1
+			cmp optLevel, 1
 			je nextTimed
 			
-			sub optTimed, 1
+			sub optLevel, 1
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
@@ -569,7 +588,7 @@ timedMenu proc
 		je selectTimed
 			
 		backTimed:
-			mov optTimed, 1
+			mov optLevel, 1
 			call deleteSelect
 			mov yloc, 73          ;105 -> y location of first underline, varies
 			call drawSelect
@@ -578,7 +597,7 @@ timedMenu proc
 		je selectTimed
 		
 		nextTimed:
-			mov optTimed, 6
+			mov optLevel, 6
 			call deleteSelect
 			mov yloc, 153          ;165 -> y location of last underline, varies
 			call drawSelect
@@ -588,15 +607,15 @@ timedMenu proc
 		
 	selectedTimed:
 		mov lmenu, 0
-		cmp optTimed, 1
-		je timed1
-		cmp optTimed, 6
+		cmp optLevel, 6
+		jne timed1
+		cmp optLevel, 6
 		je backMenu1
 		
 	timed1:
 		mov begin, 1
 		mov gamemode, 1
-		call timedmode
+		call levelmode
 		ret
 		
 	backMenu1:
@@ -663,27 +682,99 @@ levelOne endp
 
 levelTwo proc
 	mov brick1x, 33
-	mov brick1y, 26
+	mov brick1y, 29
 	mov brick2x, 91
-	mov brick2y, 26
+	mov brick2y, 29
 	mov brick3x, 219
-	mov brick3y, 44
+	mov brick3y, 47
 	mov brick4x, 33
-	mov brick4y, 62
+	mov brick4y, 65
 	mov brick5x, 91
-	mov brick5y, 62
+	mov brick5y, 65
 	mov brick6x, 191
-	mov brick6y, 26
+	mov brick6y, 29
 	mov brick7x, 249
-	mov brick7y, 26
+	mov brick7y, 29
 	mov brick8x, 61
-	mov brick8y, 44
+	mov brick8y, 47
 	mov brick9x, 191
-	mov brick9y, 62
+	mov brick9y, 65
 	mov brick10x, 249
-	mov brick10y, 62
+	mov brick10y, 65
 	ret
 levelTwo endp
+
+levelThree proc
+	mov brick1x, 115
+	mov brick1y, 39
+	mov brick2x, 169
+	mov brick2y, 39
+	mov brick3x, 91
+	mov brick3y, 60
+	mov brick4x, 142
+	mov brick4y, 60
+	mov brick5x, 193
+	mov brick5y, 60
+	mov brick6x, 142
+	mov brick6y, 21
+	mov brick7x, 65
+	mov brick7y, 82
+	mov brick8x, 116
+	mov brick8y, 82
+	mov brick9x, 167
+	mov brick9y, 82
+	mov brick10x, 218
+	mov brick10y, 82
+	ret
+levelThree endp
+
+levelFour proc
+	mov brick1x, 107
+	mov brick1y, 22
+	mov brick2x, 192
+	mov brick2y, 42
+	mov brick3x, 143
+	mov brick3y, 60
+	mov brick4x, 193
+	mov brick4y, 77
+	mov brick5x, 107
+	mov brick5y, 101
+	mov brick6x, 151
+	mov brick6y, 32
+	mov brick7x, 90
+	mov brick7y, 48
+	mov brick8x, 216
+	mov brick8y, 59
+	mov brick9x, 90
+	mov brick9y, 76
+	mov brick10x, 153
+	mov brick10y, 88
+	ret
+levelFour endp
+
+levelFive proc
+	mov brick1x, 71
+	mov brick1y, 44
+	mov brick2x, 118
+	mov brick2y, 44
+	mov brick3x, 167
+	mov brick3y, 44
+	mov brick4x, 215
+	mov brick4y, 44
+	mov brick5x, 142
+	mov brick5y, 83
+	mov brick6x, 94
+	mov brick6y, 24
+	mov brick7x, 190
+	mov brick7y, 24
+	mov brick8x, 95
+	mov brick8y, 63
+	mov brick9x, 142
+	mov brick9y, 63
+	mov brick10x, 191
+	mov brick10y, 63
+	ret
+levelFive endp
 
 StartPage proc
 	call setVideoMode
@@ -789,6 +880,7 @@ StartPage endp
 menu proc
 	mov lmenu, 1
 	mov opt, 1
+	mov optLevel, 1
 	mov ballX, 158
 	mov ballY, 163
 	mov ballLeft, 1
@@ -798,6 +890,8 @@ menu proc
 	mov yloc, 129
 	mov wid, 25
 	mov timeCtr, 0
+	mov tens, 35h
+	mov ones, 39h
 	mov scoreCount, 0
 
 	mov ah, 02h
