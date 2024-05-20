@@ -6,7 +6,8 @@ entry:
 EXTERNDELAY = 3
 
 .data
-	score db 'Score: $'
+	score_text db 'Time Consumed: $'
+	timeScore dw 0
 	scoreCount dw 0
 	ending db ' $'
 	ctr db 0
@@ -14,8 +15,8 @@ EXTERNDELAY = 3
 	time db ' $'
 	soundOn db 1
 
-	tens db 35h
-	ones db 39h
+	tens dw 53
+	ones dw 57
 	timeCtr db 0
 	
 	blockbuster_text db 'BLOCK BUSTER', '$'
@@ -173,7 +174,6 @@ local check
 	mov begin, 0                        ;stop gameloop
 	redrawball 0
 	redrawStriker 0
-	mov scoreCount, 0
     call GameCompletedPage
     
     check:
@@ -231,11 +231,11 @@ printTime proc
 	je tenths
 	
 	mov ah, 02h
-	mov dl, tens
+	mov dx, tens
 	int 21h
 	
 	mov ah, 02h
-	mov dl, ones
+	mov dx, ones
 	int 21h
 	
 	mov cx, 02
@@ -253,7 +253,7 @@ printTime proc
 	
 	tenths:
 	dec tens
-	mov ones, 39h
+	mov ones, 57
 	jmp show
 printTime endp
 
@@ -286,8 +286,8 @@ levelmode proc
 	
 	level3Game:
 		call levelThree
-		mov innerDelay, 1
-		mov fastball, 1
+		mov innerDelay, 0
+		mov fastball, 0
 		jmp next
 		
 	level4Game:
@@ -901,9 +901,10 @@ menu proc
 	mov yloc, 129
 	mov wid, 25
 	mov timeCtr, 0
-	mov tens, 35h
-	mov ones, 39h
+	mov tens, 53
+	mov ones, 57
 	mov scoreCount, 0
+	mov timeScore, 0
 
 	mov ah, 02h
 	mov bh, 00h
@@ -1203,7 +1204,7 @@ GameCompletedPage proc
 	
 	mov ah, 02h
     mov bh, 00h
-    mov dh, 11h
+    mov dh, 13h
     mov dl, 10h
     int 10h
     
@@ -1213,7 +1214,7 @@ GameCompletedPage proc
     
     mov ah, 02h
     mov bh, 00h
-    mov dh, 13h
+    mov dh, 15h
     mov dl, 12h
     int 10h
     
@@ -1223,9 +1224,15 @@ GameCompletedPage proc
     
 	mov lmenu, 1
 	mov xloc, 145
-	mov yloc, 145
+	mov yloc, 161
 	mov wid, 25
     call drawSelect
+	
+	cmp gamemode, 1
+	jne selectCompleted
+	
+	call computeScore
+	call DrawScores
 	
 	selectCompleted:
 		mov ah, 00h                ;read keyboard input
@@ -1264,7 +1271,7 @@ GameCompletedPage proc
 		backCompleted:
 			mov optCompleted, 1
 			call deleteSelect
-			mov yloc, 145          ;129 -> y location of first underline, varies
+			mov yloc, 161          ;129 -> y location of first underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
@@ -1273,7 +1280,7 @@ GameCompletedPage proc
 		nextCompleted:
 			mov optCompleted, 2
 			call deleteSelect
-			mov yloc, 161          ;177 -> y location of last underline, varies
+			mov yloc, 177          ;177 -> y location of last underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
@@ -1361,7 +1368,7 @@ GameOverPage proc
 	
 	mov ah, 02h
     mov bh, 00h
-    mov dh, 13h
+    mov dh, 11h
     mov dl, 10h
     int 10h
     
@@ -1371,7 +1378,7 @@ GameOverPage proc
     
     mov ah, 02h
     mov bh, 00h
-    mov dh, 15h
+    mov dh, 13h
     mov dl, 12h
     int 10h
     
@@ -1381,7 +1388,7 @@ GameOverPage proc
     
 	mov lmenu, 1
 	mov xloc, 145
-	mov yloc, 161
+	mov yloc, 145
 	mov wid, 25
     call drawSelect
 	
@@ -1422,7 +1429,7 @@ GameOverPage proc
 		backOver:
 			mov optOver, 1
 			call deleteSelect
-			mov yloc, 161          ;129 -> y location of first underline, varies
+			mov yloc, 145          ;129 -> y location of first underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
@@ -1431,7 +1438,7 @@ GameOverPage proc
 		nextOver:
 			mov optOver, 2
 			call deleteSelect
-			mov yloc, 177          ;177 -> y location of last underline, varies
+			mov yloc, 161          ;177 -> y location of last underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
@@ -1820,13 +1827,13 @@ DrawScores proc
     push dx
     push ax
                  
-    mov dh, 23 
-    mov dl, 5 
-    mov ah, 2 
+    mov ah, 02h
+	mov dh, 10h 
+    mov dl, 0Ah
     int 10h
     
-    lea dx, score
-    mov ah, 9
+    lea dx, score_text
+    mov ah, 09h
     int 21h
     
     call printScore 
@@ -1843,7 +1850,7 @@ printScore proc
     push dx
     
     mov cx, 0
-    mov ax, scoreCount
+    mov ax, timeScore
 	
     fetch:                              ;fetch the score by digit and store in the stack
 		mov bx, 10
@@ -1868,6 +1875,27 @@ printScore proc
     
     ret
 printScore endp
+
+computeScore proc
+	push ax 
+	push cx
+	
+	mov ax, 5
+	sub tens, 48
+	sub ax, tens 
+	mov cx, 10
+	mul cx
+	mov timeScore, ax	
+	
+	mov ax, 10
+	sub ones, 48
+	sub ax, ones
+	add timeScore, ax
+	
+	pop ax 
+	pop cx
+	ret
+computeScore endp
 
 sleep proc
 	mov cx,111111111111111b 
