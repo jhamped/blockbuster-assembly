@@ -27,6 +27,7 @@ EXTERNDELAY = 3
 	levelmode_text db 'LEVEL MODE', '$'
 	timedmode_text db 'TIMED MODE','$'
 	options_text db 'OPTIONS','$'
+	nextlevel_text db 'NEXT LEVEL', '$'
 	exit_text db 'EXIT','$'
 	mainmenu_text db 'MAIN MENU', '$'
 	back_text db 'BACK', '$'
@@ -256,6 +257,20 @@ printTime proc
 	mov ones, 57
 	jmp show
 printTime endp
+
+stopTime proc
+	cmp tens, 48
+	je checkOnes 
+	ret
+	
+	checkOnes:
+		cmp ones, 48
+		je stop
+		ret
+	
+	stop:
+		call GameOverPage
+stopTime endp
 
 levelmode proc
 	call setVideoMode
@@ -1071,22 +1086,23 @@ gameLoop:
 	cmp begin, 1                         ;check if game is set to start
 	jne repeat                           ;restart game loop if begin = 0
    
-   cmp gamemode, 0
-   je none1
+	cmp gamemode, 0
+	je none1
    
-   cmp timeCtr, 100
-   jne none1
-   dec ones
-   mov timeCtr, 0
-   call printTime
-   
-   none1:
-   call Collisionwall                   ;check if ball hits walls
-   call CollisionStriker                ;check if ball hits striker
-   call CollideB
-   call ballMove                        ;ball movement
-   call sleep                           ;continue the gameloop
-   jmp gameLoop                         ;loop the game
+	cmp timeCtr, 100
+	jne none1
+	dec ones
+	mov timeCtr, 0
+	call printTime
+	call stopTime
+	
+	none1:
+	call Collisionwall                   ;check if ball hits walls
+	call CollisionStriker                ;check if ball hits striker
+	call CollideB
+	call ballMove                        ;ball movement
+	call sleep                           ;continue the gameloop
+	jmp gameLoop                         ;loop the game
     
 exit:
     ret
@@ -1669,7 +1685,7 @@ CollisionStriker proc
     cmp dx, 165                         ;check if the ball hits the bottom
     jl movement                         ;if not, continue moving the ball
     cmp dx, 170 
-    jg finish 
+    jg check1 
     
     mov cx, strikerX   
     mov ax, ballX   
@@ -1683,7 +1699,7 @@ CollisionStriker proc
     jmp movement
     
     fail:
-		jmp finish
+		jmp check1
 		push ax
 		push bx
 		push cx
@@ -1707,19 +1723,32 @@ CollisionStriker proc
 
     jmp movement
     
+	movement:
+	pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+	
+	check1:
+		cmp gamemode, 1
+		jne finish
+		redrawball 0
+		mov ballY, 163
+		mov ballX, 158
+		mov ballUp, 1
+		mov ballLeft, 1
+		redrawball 15
+		call gameloop
+		ret
+		
     finish:  
 		mov begin,0
 		redrawball 0
 		redrawStriker 0
 		call GameOverPage	
 	 
-    movement:  
     
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-    ret
 CollisionStriker endp
 
 Collisionwall proc     
@@ -1829,7 +1858,7 @@ DrawScores proc
                  
     mov ah, 02h
 	mov dh, 10h 
-    mov dl, 0Ah
+    mov dl, 0Ch
     int 10h
     
     lea dx, score_text
