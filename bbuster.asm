@@ -55,6 +55,7 @@ EXTERNDELAY = 3
 	ballLeft db 1                  ;left movement of ball
 	ballUp db 1	                   ;up movement of ball
 	innerDelay db 0                ;speed of the ball
+	fastBall db 0
 	
 	color db 0	                   ;brick color
 	startx dw 0	                   ;starting X location of multiple elements
@@ -273,22 +274,32 @@ levelmode proc
 
 	level1Game:
 		call levelOne
+		mov innerDelay, 0
+		mov fastball, 0
 		jmp next
 	
 	level2Game:
 		call levelTwo
+		mov innerDelay, 0
+		mov fastball, 0
 		jmp next
 	
 	level3Game:
 		call levelThree
+		mov innerDelay, 1
+		mov fastball, 1
 		jmp next
 		
 	level4Game:
 		call levelFour
+		mov innerDelay, 1
+		mov fastball, 1
 		jmp next
 		
 	level5Game:
 		call levelFive
+		mov innerDelay, 1
+		mov fastball, 1
 		jmp next
 
 	next:
@@ -729,25 +740,25 @@ levelThree proc
 levelThree endp
 
 levelFour proc
-	mov brick1x, 107
+	mov brick1x, 106
 	mov brick1y, 22
-	mov brick2x, 192
+	mov brick2x, 191
 	mov brick2y, 42
-	mov brick3x, 143
+	mov brick3x, 142
 	mov brick3y, 60
-	mov brick4x, 193
+	mov brick4x, 192
 	mov brick4y, 77
-	mov brick5x, 107
+	mov brick5x, 106
 	mov brick5y, 101
-	mov brick6x, 151
+	mov brick6x, 150
 	mov brick6y, 32
-	mov brick7x, 90
+	mov brick7x, 89
 	mov brick7y, 48
-	mov brick8x, 216
+	mov brick8x, 215
 	mov brick8y, 59
-	mov brick9x, 90
+	mov brick9x, 89
 	mov brick9y, 76
-	mov brick10x, 153
+	mov brick10x, 152
 	mov brick10y, 88
 	ret
 levelFour endp
@@ -1760,7 +1771,16 @@ ballMove proc
 	inc innerDelay
 	cmp innerDelay, EXTERNDELAY         ;create delay on the movement of the ball
 	jne movement1 
+	
+	cmp fastBall, 0
+	je slow
+	mov innerDelay, 1
+	jmp nextball
+	
+	slow:
 	mov innerDelay, 0
+	
+	nextball:
     redrawBall 0  
     
 	mov bx, ballX 
