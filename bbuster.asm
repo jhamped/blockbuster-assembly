@@ -9,6 +9,7 @@ EXTERNDELAY = 3
 	score_text db 'Time Consumed: $'
 	timeScore dw 0
 	scoreCount dw 0
+	lives dw 3
 	ending db ' $'
 	ctr db 0
 	gamemode db 0
@@ -117,18 +118,6 @@ BuildBrick macro  A, B, C
     pop ax
 endm
 
-BuildSpecialBrick macro  A, B
-    push ax
-    push bx
-	
-    mov ax, A
-    mov bx, B
-    call AddSpecialBrick
-	
-    pop bx
-    pop ax
-endm
-
 redrawBall macro newColor
     mov color, newColor
     call drawball
@@ -216,6 +205,42 @@ main proc
 	call menu
 	call setVideoMode
 main endp
+
+drawLives proc
+	cmp lives, 3
+	jne twoLives
+	
+	drawTitle 303, 184, 6, 11, 4     ;draw Heart3 this is red
+	drawTitle 303, 190, 11, 6, 4
+	
+	twoLives:
+	cmp lives, 2
+	jl oneLife
+	drawTitle 285, 184, 6, 11, 4      ;draw Heart2 this is red
+	drawTitle 285, 190, 11, 6, 4
+
+	oneLife:
+	cmp lives, 0
+	je noLives
+	drawTitle 267, 184, 6, 11, 4      ;draw Heart1 this is red
+	drawTitle 267, 190, 11, 6, 4
+	
+	noLives:
+	ret
+drawLives endp
+
+removeLives proc
+	drawTitle 303, 184, 6, 11, 0     ;draw Heart3 this is red
+	drawTitle 303, 190, 11, 6, 0
+	
+	drawTitle 285, 184, 6, 11, 0      ;draw Heart2 this is red
+	drawTitle 285, 190, 11, 6, 0
+
+	drawTitle 267, 184, 6, 11, 0      ;draw Heart1 this is red
+	drawTitle 267, 190, 11, 6, 0
+	
+	ret
+removeLives endp
 
 printTime proc
 	push ax
@@ -1097,6 +1122,11 @@ gameLoop:
 	call stopTime
 	
 	none1:
+	cmp gamemode, 0
+	jne noLives1
+	call drawLives
+	
+	noLives1:
 	call Collisionwall                   ;check if ball hits walls
 	call CollisionStriker                ;check if ball hits striker
 	call CollideB
@@ -1732,7 +1762,7 @@ CollisionStriker proc
 	
 	check1:
 		cmp gamemode, 1
-		jne finish
+		jl decLives1
 		redrawball 0
 		mov ballY, 163
 		mov ballX, 158
@@ -1743,13 +1773,31 @@ CollisionStriker proc
 		ret
 		
     finish:  
-		mov begin,0
+		mov begin, 0
 		redrawball 0
 		redrawStriker 0
 		call GameOverPage	
 	 
-    
+    decLives1:
+		cmp lives, 0
+		je finish
+		call removeLives
+		call decLives
+		ret
+	
 CollisionStriker endp
+
+decLives proc
+	dec lives
+	redrawball 0
+	mov ballY, 163
+	mov ballX, 158
+	mov ballUp, 1
+	mov ballLeft, 1
+	redrawball 15
+	call gameloop
+	ret
+decLives endp
 
 Collisionwall proc     
     mov bx, ballX
