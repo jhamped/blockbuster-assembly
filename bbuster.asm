@@ -28,7 +28,7 @@ EXTERNDELAY = 3
 	levelmode_text db 'LEVEL MODE', '$'
 	timedmode_text db 'TIMED MODE','$'
 	options_text db 'OPTIONS','$'
-	nextlevel_text db 'NEXT LEVEL', '$'
+	nextlevel_text db 'NEXT', '$'
 	exit_text db 'EXIT','$'
 	mainmenu_text db 'MAIN MENU', '$'
 	back_text db 'BACK', '$'
@@ -297,9 +297,52 @@ stopTime proc
 		call GameOverPage
 stopTime endp
 
+playNext proc
+	mov ballX, 158
+	mov ballY, 163
+	mov ballLeft, 1
+	mov ballUp, 1
+	mov strikerX, 140
+	mov timeCtr, 0
+	mov tens, 53
+	mov ones, 57
+	mov scoreCount, 0
+	mov timeScore, 0
+	
+	cmp optLevel, 1
+	je playLevel2
+	cmp optLevel, 2
+	je playLevel3
+	cmp optLevel, 3
+	je playLevel4
+	cmp optLevel, 4
+	je playLevel5
+	
+	playLevel2:
+		mov optLevel, 2
+		jmp play 
+		
+	playLevel3:
+		mov optLevel, 3
+		jmp play 
+		
+	playLevel4:
+		mov optLevel, 4
+		jmp play 
+		
+	playLevel5:
+		mov optLevel, 5
+		jmp play 
+		
+	play:
+		call levelmode
+	ret
+playNext endp
+
 levelmode proc
 	call setVideoMode
 	call drawBoundary
+	mov begin, 1
 
 	cmp optLevel, 1
 	je level1Game
@@ -490,8 +533,6 @@ levelMenu proc
 		mov lmenu, 0
 		cmp optLevel, 6
 		je backMenu
-		;cmp optLevel, 6
-		;jne level1
 		
 	level1:
 		mov begin, 1
@@ -936,7 +977,7 @@ menu proc
 	mov ballY, 163
 	mov ballLeft, 1
 	mov ballUp, 1
-	mov strikerY, 170
+	mov strikerX, 140
 	mov xloc, 145
 	mov yloc, 129
 	mov wid, 25
@@ -1056,9 +1097,6 @@ menu proc
 	
 	start_timed:
 		call timedMenu
-		;mov begin, 1
-		;mov gamemode, 1
-		;call timedmode
 		ret
 	
 	terminate:
@@ -1209,44 +1247,54 @@ GameCompletedPage proc
 	
 	call setVideoMode
 	
-	drawTitle 67, 24, 5, 19, 5          ;draw Y
-    drawTitle 73, 37, 13, 6, 5
-    drawTitle 87, 24, 5, 19, 5
-    drawTitle 77, 44, 6, 13, 5 
+	drawTitle 67, 19, 5, 19, 5          ;draw Y
+    drawTitle 73, 32, 13, 6, 5
+    drawTitle 87, 19, 5, 19, 5
+    drawTitle 77, 39, 6, 13, 5 
 	
-	drawTitle 98, 24, 6, 33, 5          ;draw O
-    drawTitle 115, 24, 4, 33, 5
-    drawTitle 120, 24, 0, 32, 5
-    drawTitle 105, 24, 9, 6, 5
-    drawTitle 105, 52, 9, 5, 5 
+	drawTitle 98, 19, 6, 33, 5          ;draw O
+    drawTitle 115, 19, 4, 33, 5
+    drawTitle 120, 19, 0, 32, 5
+    drawTitle 105, 19, 9, 6, 5
+    drawTitle 105, 47, 9, 5, 5 
 
-	drawTitle 127, 24, 6, 33, 5         ;draw U
-    drawTitle 144, 24, 6, 33, 5
-    drawTitle 127, 52, 23, 6, 5
+	drawTitle 127, 19, 6, 33, 5         ;draw U
+    drawTitle 144, 19, 6, 33, 5
+    drawTitle 127, 47, 23, 6, 5
 	
-	drawTitle 168, 24, 5, 33, 5         ;draw D
-    drawTitle 174, 24, 14, 6, 5
-    drawTitle 174, 52, 14, 5, 5
-    drawTitle 184, 28, 6, 27, 5  
+	drawTitle 168, 19, 5, 33, 5         ;draw D
+    drawTitle 174, 19, 14, 6, 5
+    drawTitle 174, 47, 14, 5, 5
+    drawTitle 184, 23, 6, 27, 5  
 	
-	drawTitle 197, 24, 23, 6, 5         ;draw I
-    drawTitle 197, 52, 23, 5, 5
-    drawTitle 206, 31, 6, 20, 5
+	drawTitle 197, 19, 23, 6, 5         ;draw I
+    drawTitle 197, 47, 23, 5, 5
+    drawTitle 206, 26, 6, 20, 5
 	
-	drawTitle 227, 24, 5, 33, 5         ;draw D
-    drawTitle 233, 24, 14, 6, 5
-    drawTitle 233, 52, 14, 5, 5
-    drawTitle 243, 28, 6, 27, 5 
+	drawTitle 227, 19, 5, 33, 5         ;draw D
+    drawTitle 233, 19, 14, 6, 5
+    drawTitle 233, 47, 14, 5, 5
+    drawTitle 243, 23, 6, 27, 5 
 	
-	drawTitle 130, 77, 23, 6, 5         ;draw I
-    drawTitle 130, 104, 23, 5, 5
-    drawTitle 139, 83, 6, 20, 5 
+	drawTitle 130, 72, 23, 6, 5         ;draw I
+    drawTitle 130, 99, 23, 5, 5
+    drawTitle 139, 78, 6, 20, 5 
 	
-	drawTitle 159, 77, 26, 6, 5         ;draw T
-    drawTitle 169, 84, 6, 25, 5
+	drawTitle 159, 72, 26, 6, 5         ;draw T
+    drawTitle 169, 79, 6, 25, 5
 	
-	drawTitle 191, 77, 6, 23, 5         ;draw !
-    drawTitle 191, 104, 6, 5, 5
+	drawTitle 191, 72, 6, 23, 5         ;draw !
+    drawTitle 191, 99, 6, 5, 5
+	
+	mov ah, 02h
+    mov bh, 00h
+    mov dh, 11h
+    mov dl, 12h
+    int 10h
+    
+    mov ah, 09h
+    lea dx, nextlevel_text
+    int 21h
 	
 	mov ah, 02h
     mov bh, 00h
@@ -1270,7 +1318,7 @@ GameCompletedPage proc
     
 	mov lmenu, 1
 	mov xloc, 145
-	mov yloc, 161
+	mov yloc, 145
 	mov wid, 25
     call drawSelect
 	
@@ -1291,7 +1339,7 @@ GameCompletedPage proc
 		je selectedCompleted
 		
 		downCompleted:
-			cmp optCompleted, 2             ;4 -> number of buttons, varies
+			cmp optCompleted, 3             ;4 -> number of buttons, varies
 			je backCompleted
 			
 			add optCompleted, 1
@@ -1317,14 +1365,14 @@ GameCompletedPage proc
 		backCompleted:
 			mov optCompleted, 1
 			call deleteSelect
-			mov yloc, 161          ;129 -> y location of first underline, varies
+			mov yloc, 145          ;129 -> y location of first underline, varies
 			call drawSelect
 		
 		cmp lmenu, 1
 		je selectCompleted
 		
 		nextCompleted:
-			mov optCompleted, 2
+			mov optCompleted, 3
 			call deleteSelect
 			mov yloc, 177          ;177 -> y location of last underline, varies
 			call drawSelect
@@ -1335,9 +1383,15 @@ GameCompletedPage proc
 	selectedCompleted:
 		mov lmenu, 0
 		cmp optCompleted, 1
-		je backMain
+		je nextLevel1
 		cmp optCompleted, 2
+		je backMain
+		cmp optCompleted, 3
 		je quit
+
+	nextLevel1:
+		call playNext
+		ret
 
 	backMain:
 		call StartPage
@@ -1905,7 +1959,7 @@ DrawScores proc
     push ax
                  
     mov ah, 02h
-	mov dh, 10h 
+	mov dh, 0Eh 
     mov dl, 0Ch
     int 10h
     
