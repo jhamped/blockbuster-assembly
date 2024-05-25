@@ -32,6 +32,8 @@ EXTERNDELAY = 3
 	exit_text db 'EXIT','$'
 	mainmenu_text db 'MAIN MENU', '$'
 	back_text db 'BACK', '$'
+	yes_text db 'YES!', '$'
+    no_text db 'NO:(','$'
 	
 	level1_text db 'LEVEL 1', '$'
 	level2_text db 'LEVEL 2', '$'
@@ -39,13 +41,14 @@ EXTERNDELAY = 3
 	level4_text db 'LEVEL 4', '$'
 	level5_text db 'LEVEL 5', '$'
 
-	xloc dw 145
+	xloc dw 147
 	yloc dw 129
 	wid dw 25
 	opt db 1
 	optCompleted db 1
 	optOver db 1
 	optLevel db 1
+	currentOpt db 1
 	lmenu db 1
 	
 	xlocRec dw 0
@@ -94,6 +97,20 @@ EXTERNDELAY = 3
 	brick10x dw 0
 	brick10y dw 0
 	
+	musicEnabled db 1	
+	; Notes (approximate frequencies for Super Mario Bros. Overworld theme)
+    do      dw 523   ; do
+    re      dw 587   ; re
+    mi      dw 659   ; mi
+    fa      dw 698   ; fa
+    sol     dw 784   ; sol
+    la      dw 880   ; la
+    ti      dw 988   ; ti
+    do_high dw 1046  ; do (Higher octave)
+
+    clock equ es:6Ch
+    tone dw ?
+	
 .code
 drawTitle macro x, y, w, h, c
 	mov xlocRec, x
@@ -105,7 +122,7 @@ drawTitle macro x, y, w, h, c
 	call AddRec
 endm
 
-BuildBrick macro  A, B, C
+BuildBrick macro A, B, C
     push ax
     push bx
 	
@@ -343,6 +360,7 @@ levelmode proc
 	call setVideoMode
 	call drawBoundary
 	mov begin, 1
+	mov lives, 3
 
 	cmp optLevel, 1
 	je level1Game
@@ -369,20 +387,20 @@ levelmode proc
 	
 	level3Game:
 		call levelThree
-		mov innerDelay, 0
-		mov fastball, 0
+		mov innerDelay, 1
+		mov fastball, 1
 		jmp next
 		
 	level4Game:
 		call levelFour
-		mov innerDelay, 1
-		mov fastball, 1
+		mov innerDelay, 2
+		mov fastball, 2
 		jmp next
 		
 	level5Game:
 		call levelFive
-		mov innerDelay, 1
-		mov fastball, 1
+		mov innerDelay, 2
+		mov fastball, 2
 		jmp next
 
 	next:
@@ -480,6 +498,11 @@ levelMenu proc
 	selectLevel:
 		mov ah, 00h                ;read keyboard input
 		int 16h
+		cmp soundOn, 1
+		jne noSound3
+		call beep
+		
+		noSound3:
 		cmp ax, 4800h              ;up arrow key 
 		je upLevel
 		cmp ax, 5000h              ;down arrow key
@@ -495,9 +518,7 @@ levelMenu proc
 			call deleteSelect
 			add yloc, 16           
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectLevel
+			jmp selectLevel
 		
 		upLevel:
 			cmp optLevel, 1
@@ -507,27 +528,21 @@ levelMenu proc
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
-			
-		cmp lmenu, 1
-		je selectLevel
+			jmp selectLevel
 			
 		backLevel:
 			mov optLevel, 1
 			call deleteSelect
 			mov yloc, 73          ;105 -> y location of first underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectLevel 
+			jmp selectLevel
 		
 		nextLevel:
 			mov optLevel, 6
 			call deleteSelect
 			mov yloc, 153          ;165 -> y location of last underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectLevel
+			jmp selectLevel
 		
 	selectedLevel:
 		mov lmenu, 0
@@ -648,6 +663,11 @@ timedMenu proc
 	selectTimed:
 		mov ah, 00h                ;read keyboard input
 		int 16h
+		cmp soundOn, 1
+		jne noSound4
+		call beep
+		
+		noSound4:
 		cmp ax, 4800h              ;up arrow key 
 		je upTimed
 		cmp ax, 5000h              ;down arrow key
@@ -663,9 +683,7 @@ timedMenu proc
 			call deleteSelect
 			add yloc, 16           
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectTimed
+			jmp selectTimed
 		
 		upTimed:
 			cmp optLevel, 1
@@ -675,27 +693,21 @@ timedMenu proc
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
-			
-		cmp lmenu, 1
-		je selectTimed
+			jmp selectTimed
 			
 		backTimed:
 			mov optLevel, 1
 			call deleteSelect
 			mov yloc, 73          ;105 -> y location of first underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectTimed
+			jmp selectTimed
 		
 		nextTimed:
 			mov optLevel, 6
 			call deleteSelect
 			mov yloc, 153          ;165 -> y location of last underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectTimed
+			jmp selectTimed
 		
 	selectedTimed:
 		mov lmenu, 0
@@ -969,16 +981,344 @@ StartPage proc
 	ret
 StartPage endp
 
+optionsPage proc
+
+    ; Clear the screen in graphics mode
+    call setVideoMode
+
+    ; Draw E
+    drawTitle 90, 36, 6, 30, 13
+    drawTitle 96, 36, 12, 6, 13
+    drawTitle 96, 48, 6, 6, 13
+    drawTitle 96, 60, 12, 6, 13    
+  
+    ; Draw n
+    drawTitle 114, 36, 6, 30, 13
+    drawTitle 120, 36, 6, 6, 13
+    drawTitle 126, 36, 6, 30, 13
+
+    ; Draw a
+    drawTitle 138, 36, 12, 6, 13
+    drawTitle 150, 36, 6, 30, 13
+    
+    drawTitle 138, 48, 12, 6, 13
+    drawTitle 138, 54, 6, 6, 13
+    drawTitle 138, 60, 12, 6, 13
+
+    ; Draw b
+    drawTitle 162, 36, 6, 30, 13
+    drawTitle 168, 48, 6, 6, 13
+    drawTitle 168, 60, 6, 6, 13
+    drawTitle 174, 48, 6, 18, 13
+
+    ; Draw l
+    drawTitle 186, 36, 6, 30, 13
+    drawTitle 192, 60, 12, 6, 13
+    
+    ; Draw e
+    drawTitle 210, 36, 6, 30, 13
+    drawTitle 216, 36, 6, 6, 13
+    drawTitle 216, 48, 6, 6, 13
+    drawTitle 216, 60, 12, 6, 13
+    drawTitle 222, 36, 6, 18, 13
+
+    ; Draw s
+    drawTitle 78, 72, 18, 6, 13
+    drawTitle 78, 84, 18, 6, 13
+    drawTitle 78, 96, 18, 6, 13
+    drawTitle 78, 78, 6, 6, 13
+    drawTitle 90, 90, 6, 6, 13
+
+    ; Draw o
+    drawTitle 102, 72, 6, 30, 13
+    drawTitle 108, 72, 6, 6, 13
+    drawTitle 108, 96, 6, 6, 13
+    drawTitle 114, 72, 6, 30, 13
+
+    ; Draw u
+    drawTitle 126, 72, 6, 30, 13
+    drawTitle 132, 96, 6, 6, 13
+    drawTitle 138, 72, 6, 30, 13
+
+    ; Draw n
+    drawTitle 150, 72, 6, 30, 13
+    drawTitle 156, 72, 6, 6, 13
+    drawTitle 162, 72, 6, 30, 13
+
+    ; Draw d
+    drawTitle 186, 72, 6, 30, 13
+    drawTitle 174, 84, 6, 18, 13
+    drawTitle 180, 84, 6, 6, 13
+    drawTitle 180, 96, 6, 6, 13
+   
+    ; Draw s
+    drawTitle 198, 72, 18, 6, 13
+    drawTitle 198, 84, 18, 6, 13
+    drawTitle 198, 96, 18, 6, 13
+    drawTitle 198, 78, 6, 6, 13
+    drawTitle 210, 90, 6, 6, 13
+   
+    ; draw line left
+    drawTitle 5, 5, 4, 188, 13
+
+    ; draw line right
+    drawTitle 309, 5, 4, 188, 13
+
+    ; draw line up
+    drawTitle 9, 5, 300, 4, 13
+
+    ; draw line down
+    drawTitle 9, 189, 300, 4, 13
+
+    ; Draw ?
+    drawTitle 234, 72, 6, 18, 13
+    drawTitle 222, 72, 12, 6, 13
+    drawTitle 228, 84, 6, 6, 13
+    drawTitle 228, 96, 6, 6, 13
+
+	call enable        ; Handle user input and music
+
+    pop ax bx cx dx
+optionsPage endp
+
+enable proc
+	mov ah, 02h
+    mov bh, 00h
+    mov dh, 0Fh
+    mov dl, 12h
+    int 10h
+    
+    mov ah, 09h
+    lea dx, yes_text
+    int 21h
+    
+    mov ah, 02h
+    mov bh, 00h
+    mov dh, 11h
+    mov dl, 12h
+    int 10h
+    
+    mov ah, 09h
+    lea dx, no_text
+    int 21h
+    
+    mov ah, 02h
+    mov bh, 00h
+    mov dh, 13h
+    mov dl, 12h
+    int 10h
+    
+    mov ah, 09h
+    lea dx, back_text
+    int 21h
+	
+	mov currentOpt, 1
+	mov xloc, 149
+	mov yloc, 129
+	mov wid, 20
+	call drawSelect        ; Draw initial underline (yloc should be 112, not 104, for "YES")
+
+	selectMusicOption:    ; Entry point for music option selection loop
+		mov ah, 00h        ; Read keyboard input
+		int 16h
+		cmp soundOn, 1
+		jne noSound1
+		call beep
+		
+		noSound1:
+		cmp ax, 4800h      ; Up arrow
+		je upOption
+		cmp ax, 5000h      ; Down arrow
+		je downOption
+		cmp ax, 1C0Dh      ; Enter key
+		je handleMusicSelection  ; Handle music option selection immediately
+
+		downOption:
+			cmp currentOpt, 3       ; Check if already at the bottom (GO BACK TO MAIN MENU)
+			je backToTopOption       ; If so, jump to backToTopOption
+
+			add currentOpt, 1       ; Switch selection to the next option
+			call deleteSelect       ; Remove old underline
+			add yloc, 16             ; Move underline down by 16 pixels
+			call drawSelect         ; Draw new underline
+
+			jmp selectMusicOption   ; Continue the loop
+
+		upOption:
+			cmp currentOpt, 1       ; Check if already at the top (YES)
+			je nextToBottomOption    ; If so, jump to nextToBottomOption
+
+			sub currentOpt, 1       ; Switch selection to the previous option
+			call deleteSelect       ; Remove old underline
+			sub yloc, 16             ; Move underline up by 16 pixels
+			call drawSelect         ; Draw new underline
+
+			jmp selectMusicOption    ; Continue the loop
+
+		backToTopOption:       ; Handle going back to the top when at the bottom
+			mov currentOpt, 1       ; Reset to the first option (YES)
+			call deleteSelect     
+			mov yloc, 129          ; Set yloc to the position of "YES"
+			call drawSelect
+			jmp selectMusicOption  ; Continue the loop
+
+		nextToBottomOption:   ; Handle going to the bottom when at the top
+			mov currentOpt, 3       ; Set to the last option (GO BACK TO MAIN MENU)
+			call deleteSelect
+			mov yloc, 161          ; Set yloc to the position of "GO BACK TO MAIN MENU"
+			call drawSelect
+			jmp selectMusicOption  ; Continue the loop
+	
+		handleMusicSelection:            ; Handle the selected option
+			cmp currentOpt, 1
+			je enableMusic
+			cmp currentOpt, 2
+			je disableMusic
+			cmp currentOpt, 3         ; Check for "GO BACK TO MAIN MENU" option
+			je returnToMenu
+
+		enableMusic:
+		  	mov soundOn, 1
+			jmp returnToMenu
+
+		disableMusic:
+		  	mov soundOn, 0
+			jmp returnToMenu
+		  
+		returnToMenu:
+		  	call StartPage
+			call menu          ; Display the main menu
+		  	ret             ; Return from the enable procedure
+
+enable endp
+
+repeatMusic:
+musicLoop:
+	cmp musicEnabled, 1
+	jne repeatMusic 
+	
+	; Main melody
+		mov bx, offset do      ; do
+		call play_note
+		call delay         ; Short
+		
+		mov bx, offset mi      ; mi
+		call play_note
+		call delay         ; Short
+		
+		mov bx, offset sol     ; sol
+		call play_note
+		call delay         ; Short
+
+		mov bx, offset do_high ; do (high)
+		call play_note
+		call delay         ; Medium
+
+		mov bx, offset ti      ; ti
+		call play_note
+		call delay         ; Short
+
+		mov bx, offset la      ; la
+		call play_note
+		call delay         ; Medium
+
+		mov bx, offset sol     ; sol
+		call play_note
+		call delay         ; Short
+		
+		mov bx, offset mi      ; mi
+		call play_note
+		call delay         ; Long
+		call delay
+
+		; Second part
+		mov bx, offset do_high ; do (high)
+		call play_note
+		call delay         ; Short
+
+		mov bx, offset sol     ; sol
+		call play_note
+		call delay         ; Short
+
+		mov bx, offset fa      ; fa
+		call play_note
+		call delay         ; Medium
+
+		mov bx, offset mi      ; mi
+		call play_note
+		call delay         ; Medium
+
+		mov bx, offset re      ; re
+		call play_note
+		call delay         ; Short
+
+		mov bx, offset do      ; do
+		call play_note
+		call delay         ; Long
+		call delay
+
+		call menu
+
+		jmp musicLoop
+exitMusic:
+	ret
+
+stop_music proc
+    mov al, 0B6h        ; Set timer 2 to mode 3 (square wave)
+    out 43h, al
+    mov ax, 0           ; Set frequency to 0 (silence)
+    out 42h, al
+    mov al, ah
+    out 42h, al
+    ret
+stop_music endp
+
+delay proc                  ; delay procedure
+    push ax               
+    mov ax,40h               
+    mov es,ax                 
+    mov ax,[clock]
+    
+    Ketukawal:
+      cmp ax, [clock]
+      mov cx, 2               
+      je Ketukawal
+    
+    Loopdelay:
+      mov ax, [clock]
+      ketuk:
+        cmp ax,[clock]
+        je ketuk
+        loop Loopdelay
+        pop ax
+      ret
+delay endp  
+
+play_note proc
+    mov  al, 0B6h
+    out  43h, al
+    mov  ax, [bx]    ; Frequency from memory
+    out  42h, al
+    mov  al, ah
+    out  42h, al
+    in   al, 61h
+    or   al, 3
+    out  61h, al
+    ret
+play_note endp
+
 menu proc
 	mov lmenu, 1
 	mov opt, 1
 	mov optLevel, 1
+	mov optCompleted, 1
+	mov optOver, 1
 	mov ballX, 158
 	mov ballY, 163
 	mov ballLeft, 1
 	mov ballUp, 1
 	mov strikerX, 140
-	mov xloc, 145
+	mov xloc, 147
 	mov yloc, 129
 	mov wid, 25
 	mov timeCtr, 0
@@ -986,6 +1326,7 @@ menu proc
 	mov ones, 57
 	mov scoreCount, 0
 	mov timeScore, 0
+	mov lives, 3
 
 	mov ah, 02h
 	mov bh, 00h
@@ -1032,6 +1373,11 @@ menu proc
 	select:
 		mov ah, 00h
 		int 16h
+		cmp soundOn, 1
+		jne noSound2
+		call beep
+		
+		noSound2:
 		cmp ax, 4800h
 		je up1
 		cmp ax, 5000h
@@ -1047,9 +1393,7 @@ menu proc
 			call deleteSelect
 			add yloc, 16
 			call drawSelect
-		
-		cmp lmenu, 1
-		je select
+			jmp select
 		
 		up1:
 			cmp opt, 1
@@ -1059,27 +1403,21 @@ menu proc
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
-			
-		cmp lmenu, 1
-		je select
+			jmp select
 			
 		back1:
 			mov opt, 1
 			call deleteSelect
 			mov yloc, 129
 			call drawSelect
-		
-		cmp lmenu, 1
-		je select
+			jmp select
 		
 		next1:
 			mov opt, 4
 			call deleteSelect
 			mov yloc, 177
 			call drawSelect
-		
-		cmp lmenu, 1
-		je select
+			jmp select
 		
 	selected1:
 		mov lmenu, 0
@@ -1087,16 +1425,22 @@ menu proc
 		je start_level
 		cmp opt, 2
 		je start_timed
+		cmp opt, 3
+		je go_options
 		cmp opt, 4
 		je terminate
 		
 	start_level:
 		call levelMenu
-		
 		ret
 	
 	start_timed:
 		call timedMenu
+		ret
+		
+	go_options:
+		call optionsPage
+		call enable
 		ret
 	
 	terminate:
@@ -1331,6 +1675,11 @@ GameCompletedPage proc
 	selectCompleted:
 		mov ah, 00h                ;read keyboard input
 		int 16h
+		cmp soundOn, 1
+		jne noSound5
+		call beep
+		
+		noSound5:
 		cmp ax, 4800h              ;up arrow key 
 		je upCompleted
 		cmp ax, 5000h              ;down arrow key
@@ -1346,9 +1695,7 @@ GameCompletedPage proc
 			call deleteSelect
 			add yloc, 16           
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectCompleted
+			jmp selectCompleted
 		
 		upCompleted:
 			cmp optCompleted, 1
@@ -1358,27 +1705,21 @@ GameCompletedPage proc
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
-			
-		cmp lmenu, 1
-		je selectCompleted
+			jmp selectCompleted
 			
 		backCompleted:
 			mov optCompleted, 1
 			call deleteSelect
 			mov yloc, 145          ;129 -> y location of first underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectCompleted
+			jmp selectCompleted
 		
 		nextCompleted:
 			mov optCompleted, 3
 			call deleteSelect
 			mov yloc, 177          ;177 -> y location of last underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectCompleted
+			jmp selectCompleted
 		
 	selectedCompleted:
 		mov lmenu, 0
@@ -1495,6 +1836,11 @@ GameOverPage proc
 	selectOver:
 		mov ah, 00h                ;read keyboard input
 		int 16h
+		cmp soundOn, 1
+		jne noSound6
+		call beep
+		
+		noSound6:
 		cmp ax, 4800h              ;up arrow key 
 		je upOver
 		cmp ax, 5000h              ;down arrow key
@@ -1510,9 +1856,7 @@ GameOverPage proc
 			call deleteSelect
 			add yloc, 16           
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectOver
+			jmp selectOver
 		
 		upOver:
 			cmp optOver, 1
@@ -1522,27 +1866,21 @@ GameOverPage proc
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
-			
-		cmp lmenu, 1
-		je selectOver
+			jmp selectCompleted
 			
 		backOver:
 			mov optOver, 1
 			call deleteSelect
 			mov yloc, 145          ;129 -> y location of first underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectOver
+			jmp selectCompleted
 		
 		nextOver:
 			mov optOver, 2
 			call deleteSelect
 			mov yloc, 161          ;177 -> y location of last underline, varies
 			call drawSelect
-		
-		cmp lmenu, 1
-		je selectOver
+			jmp selectCompleted
 		
 	selectedOver:
 		mov lmenu, 0
