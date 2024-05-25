@@ -73,8 +73,8 @@ EXTERNDELAY = 3
 	strikerX dw 140                ;initial X location of the striker (paddle)
 	strikerY dw 170                ;initial Y location of the striker (paddle)
 	
-	boundaryEnd dw 270             ;ending boundary for the ball and striker
-	boundaryStart dw 5             ;starting boundary for the ball and striker
+	boundaryEnd dw 252             ;ending boundary for the ball and striker
+	boundaryStart dw 30             ;starting boundary for the ball and striker
 	
 	brick1x dw 0                   ;X and Y locations of the bricks
 	brick1y dw 0
@@ -175,7 +175,7 @@ local check
     call switcher                       ;if ball hits a brick, change ball direction
     DestroyBrick X, Y                   ;destroy brick
     mov Y, 300                          ;move the brick out of the way
-    cmp scoreCount, 10                   ;check if all the bricks are destroyed
+    cmp scoreCount, 10                  ;check if all the bricks are destroyed
     jne check
 	
 	mov begin, 0                        ;stop gameloop
@@ -216,7 +216,7 @@ endm
 main proc
     mov ax,@data                          ;incorporate the data values
     mov ds,ax			                   
-    
+	
 	call setVideoMode                     ;clear screen
 	call StartPage                        ;initiate start page
 	call menu
@@ -359,6 +359,7 @@ playNext endp
 levelmode proc
 	call setVideoMode
 	call drawBoundary
+	call drawBorder
 	mov begin, 1
 	mov lives, 3
 
@@ -568,6 +569,7 @@ levelMenu endp
 timedmode proc
 	call setVideoMode
 	call drawBoundary
+	call drawBorder
 	call levelOne
 	call BuildB
 	redrawStriker 13
@@ -1866,21 +1868,21 @@ GameOverPage proc
 			call deleteSelect
 			sub yloc, 16
 			call drawSelect
-			jmp selectCompleted
+			jmp selectOver 
 			
 		backOver:
 			mov optOver, 1
 			call deleteSelect
 			mov yloc, 145          ;129 -> y location of first underline, varies
 			call drawSelect
-			jmp selectCompleted
+			jmp selectOver
 		
 		nextOver:
 			mov optOver, 2
 			call deleteSelect
 			mov yloc, 161          ;177 -> y location of last underline, varies
 			call drawSelect
-			jmp selectCompleted
+			jmp selectOver
 		
 	selectedOver:
 		mov lmenu, 0
@@ -2014,34 +2016,68 @@ drawStriker proc
 drawStriker endp
 
 drawBoundary proc
-    mov color, 0   
+    mov color, 07h   
     
-    mov startx, 10                       ;top
-    mov endx, 310
-    mov starty, 1
-    mov endy, 3
+    mov startx, 22                       ;top
+    mov endx, 300
+    mov starty, 22
+    mov endy, 23
     call draw
 
-    mov startx, 307                     ;right
-    mov endx, 310
-    mov starty, 3
-    mov endy, 190
+    mov startx, 299                     ;right
+    mov endx, 300
+    mov starty, 22
+    mov endy, 180
     call draw
     
-    mov startx,10                       ;left
-    mov endx,13
-    mov starty,3
-    mov endy,190
+    mov startx,22                       ;left
+    mov endx,23
+    mov starty,22
+    mov endy,180
     call draw
  
-    mov startx, 10                      ;bottom
-    mov endx, 310
-    mov starty,187
-    mov endy,190
+    mov startx, 22                      ;bottom
+    mov endx, 300
+    mov starty,179
+    mov endy,180
     call draw 
    
     ret
 drawBoundary endp
+
+drawBorder proc
+	drawTitle 17, 9, 1, 1, 0Dh
+	drawTitle 60, 10, 1, 1, 0Dh
+	drawTitle 95, 15, 1, 1, 0Dh
+	drawTitle 131, 11, 1, 1, 0Dh
+	drawTitle 167, 10, 1, 1, 0Dh
+	drawTitle 247, 17, 1, 1, 0Dh
+	drawTitle 7, 46, 1, 1, 0Dh
+	drawTitle 11, 82, 1, 1, 0Dh
+	drawTitle 13, 137, 1, 1, 0Dh
+	drawTitle 7, 177, 1, 1, 0Dh
+	drawTitle 39, 191, 1, 1, 0Dh
+	drawTitle 74, 194, 1, 1, 0Dh
+	drawTitle 164, 185, 1, 1, 0Dh
+	drawTitle 217, 190, 1, 1, 0Dh
+	drawTitle 277, 195, 1, 1, 0Dh
+	drawTitle 315, 193, 1, 1, 0Dh
+	drawTitle 309, 163, 1, 1, 0Dh
+	drawTitle 302, 139, 1, 1, 0Dh
+	drawTitle 313, 91, 1, 1, 0Dh
+	drawTitle 306, 57, 1, 1, 0Dh
+	drawTitle 39, 11, 1, 1, 0Fh
+	drawTitle 112, 8, 1, 1, 0Fh
+	drawTitle 205, 12, 1, 1, 0Fh
+	drawTitle 279, 9, 1, 1, 0Fh
+	drawTitle 311, 26, 1, 1, 0Fh
+	drawTitle 306, 105, 1, 1, 0Fh
+	drawTitle 296, 187, 1, 1, 0Fh
+	drawTitle 144, 193, 1, 1, 0Fh
+	drawTitle 95, 186, 1, 1, 0Fh
+	drawTitle 7, 112, 1, 1, 0Fh
+	ret
+drawBorder endp
 
 draw proc
     push ax
@@ -2196,9 +2232,9 @@ Collisionwall proc
     mov cx, ballY
     
     checkLeftRight:
-		cmp bx, 15                      ;check if ball hits the left wall
+		cmp bx, 25                      ;check if ball hits the left wall
 		jl goRight
-		cmp bx, 305                     ;check if ball hits the right wall
+		cmp bx, 290                     ;check if ball hits the right wall
 		jg goLeft
 		jmp checkUpDown
 		
@@ -2210,9 +2246,9 @@ Collisionwall proc
 		mov ballLeft, 1
 	
     checkUpDown:
-		cmp cx, 10                      ;check if ball hits the top wall
+		cmp cx, 25                      ;check if ball hits the top wall
 		jl goDown
-		cmp cx, 187                     ;check if ball hits the bottom wall
+		cmp cx, 175                     ;check if ball hits the bottom wall
 		jg goUp
     
     jmp noInput
