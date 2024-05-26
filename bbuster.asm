@@ -265,21 +265,16 @@ addName proc
 	push cx
 	push dx
 	
-	mov ah, 02h
-	mov bh, 00h
-	mov dh, 05h
-	mov dl, 0Ch
-	int 10h
-	
-	mov ah, 09h
-	lea dx, entername_text
-	int 21h
+	call drawBoundary
+	call drawBorder
+	call drawBg
+	call drawName 
 	
 	mov cx, 5
     mov bp, 0
     underscore:
 		mov ah, 02h
-        mov dh, 07h
+        mov dh, 11h
         mov dl, 12h
         add dx, bp 
         inc bp
@@ -287,7 +282,7 @@ addName proc
         int 10h
 
         mov ax, 092Dh
-        mov bl, 0Dh
+        mov bl, 0Fh
         mov bh, 0
         push cx
         mov cx, 1
@@ -296,14 +291,14 @@ addName proc
 		loop underscore
 
 	lea si, playername
-	mov cx, 5
+	mov cx, 6
 	mov bp, 0
-	get_name1:
+	get_name:
 		mov ah, 7             ;read char input
 		int 21h
 		
 		mov ah, 02h           ;set cursor position
-		mov dh, 07h  
+		mov dh, 11h  
 		mov dl, 12h
 		add dx, bp            
 		inc bp                ;move cursor position 
@@ -325,12 +320,12 @@ addName proc
 		mov cx, 1
 		int 10h
 		
-		jmp get_name1
+		jmp get_name
 		
 		printchar1:
 			mov ah, 0Ah
 			mov bh, 0
-			mov bl, 0Dh 
+			mov bl, 0Fh 
 			push cx
 			mov cx, 1
 			int 10h
@@ -340,10 +335,10 @@ addName proc
 		inc si 
 	
 	cmp bp, 5
-	je save1
-	jmp get_name1
+	je save
+	jmp get_name
 	
-	save1:
+	save:
 		mov ah, 0h                 ;check keyboard input
 		int 16h
 		cmp ax, 1C0Dh              ;enter key
@@ -359,6 +354,72 @@ addName proc
 	pop dx
 	ret
 addName endp
+
+drawName proc
+	drawTitle 78, 49, 4, 20, 0Dh         ;draw E 
+	drawTitle 78, 49, 12, 4, 0Dh
+	drawTitle 78, 57, 10, 4, 0Dh
+	drawTitle 78, 65, 12, 4, 0Dh
+	
+	drawTitle 94, 49, 4, 20, 0Dh         ;draw N 
+	drawTitle 94, 50, 13, 4, 0Dh
+	drawTitle 104, 50, 4, 19, 0Dh
+	
+	drawTitle 111, 49, 16, 4, 0Dh        ;draw T
+	drawTitle 117, 49, 4, 20, 0Dh
+	
+	drawTitle 131, 49, 4, 20, 0Dh        ;draw E
+	drawTitle 131, 49, 12, 4, 0Dh
+	drawTitle 131, 57, 10, 4, 0Dh
+	drawTitle 131, 65, 12, 4, 0Dh
+	
+	drawTitle 147, 49, 4, 20, 0Dh        ;draw R
+	drawTitle 147, 49, 14, 4, 0Dh
+	drawTitle 158, 49, 4, 13, 0Dh
+	drawTitle 147, 59, 15, 4, 0Dh
+	drawTitle 156, 59, 4, 10, 0Dh
+	
+	drawTitle 172, 49, 4, 12, 0Dh        ;draw Y
+	drawTitle 172, 58, 16, 4, 0Dh
+	drawTitle 184, 49, 4, 12, 0Dh
+	drawTitle 178, 58, 4, 11, 0Dh
+	
+	drawTitle 190, 49, 4, 20, 0Dh        ;draw O  
+	drawTitle 190, 49, 14, 4, 0Dh
+	drawTitle 201, 49, 4, 20, 0Dh
+	drawTitle 190, 65, 14, 4, 0Dh
+	
+	drawTitle 207, 49, 4, 20, 0Dh        ;draw U 
+	drawTitle 207, 65, 14, 4, 0Dh
+	drawTitle 218, 49, 4, 20, 0Dh
+	
+	drawTitle 224, 49, 4, 20, 0Dh        ;draw R
+	drawTitle 224, 49, 14, 4, 0Dh
+	drawTitle 235, 49, 4, 13, 0Dh
+	drawTitle 224, 59, 14, 4, 0Dh
+	drawTitle 233, 59, 4, 10, 0Dh
+	
+	drawTitle 125, 79, 14, 4, 0Dh        ;draw N
+	drawTitle 125, 79, 4, 20, 0Dh
+	drawTitle 136, 79, 4, 20, 0Dh
+	
+	drawTitle 144, 79, 4, 20, 0Dh        ;draw A
+	drawTitle 144, 79, 14, 4, 0Dh
+	drawTitle 155, 79, 4, 20, 0Dh
+	drawTitle 144, 88, 14, 4, 0Dh
+	
+	drawTitle 162, 79, 4, 20, 0Dh        ;draw M
+	drawTitle 162, 79, 17, 4, 0Dh
+	drawTitle 176, 79, 4, 20, 0Dh
+	drawTitle 169, 79, 4, 9, 0Dh
+	
+	drawTitle 183, 79, 4, 20, 0Dh        ;draw E
+	drawTitle 183, 79, 12, 4, 0Dh
+	drawTitle 183, 87, 10, 4, 0Dh
+	drawTitle 183, 95, 12, 4, 0Dh
+	
+	ret 
+drawName endp
 
 drawLives proc
 	cmp lives, 3
@@ -585,6 +646,8 @@ levelMenu proc
 	push cx
 	
 	call setVideoMode
+	call drawBorder
+	call drawBg
 	
 	mov ah, 02h
 	mov bh, 00h
@@ -752,6 +815,8 @@ timedMenu proc
 	push dx
 	
 	call setVideoMode
+	call drawBorder
+	call drawBg
 	
 	mov ah, 02h
 	mov bh, 00h
@@ -1612,9 +1677,8 @@ menu proc
 		ret
 		
 	go_options:
-		;call optionsPage
-		;call enable
-		call leaderboard
+		call optionsPage
+		call enable
 		ret
 	
 	terminate:
