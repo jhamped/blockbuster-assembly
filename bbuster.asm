@@ -25,6 +25,16 @@ EXTERNDELAY = 3
 	gameover_text db 'GAME OVER', '$'
 	gamecompleted_text db 'That is it for now', '$'
 	
+	entername_text db 'ENTER YOUR NAME:', '$'
+	;playername db 3 dup(0) 
+	playername db 'twice', '$'
+	;filename db 'names.txt', 0
+	handle dw ?
+	scores db 00h, 6*50 dup (0) 
+	iscore db 000h, 010h
+	snake_length dw 0
+	strbuf db 4 dup(?)
+	
 	levelmode_text db 'LEVEL MODE', '$'
 	timedmode_text db 'TIMED MODE','$'
 	options_text db 'OPTIONS','$'
@@ -56,6 +66,9 @@ EXTERNDELAY = 3
 	widRec dw 0
 	heightRec dw 0
 	
+	tempLifeX dw 0
+	tempLifeY dw 0
+	
 	ballY dw 163                   ;initial Y location of ball
 	ballX dw 158                   ;initial X location of ball
 	ballLeft db 1                  ;left movement of ball
@@ -73,8 +86,8 @@ EXTERNDELAY = 3
 	strikerX dw 140                ;initial X location of the striker (paddle)
 	strikerY dw 170                ;initial Y location of the striker (paddle)
 	
-	boundaryEnd dw 252             ;ending boundary for the ball and striker
-	boundaryStart dw 30             ;starting boundary for the ball and striker
+	boundaryEnd dw 253             ;ending boundary for the ball and striker
+	boundaryStart dw 30            ;starting boundary for the ball and striker
 	
 	brick1x dw 0                   ;X and Y locations of the bricks
 	brick1y dw 0
@@ -110,6 +123,22 @@ EXTERNDELAY = 3
 
     clock equ es:6Ch
     tone dw ?
+	
+	life db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+		db 00h, 00h, 00h, 00h, 00h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 00h, 00h, 00h, 00h
+		db 00h, 00h, 00h, 00h, 0Eh, 00h, 00h, 00h, 00h, 00h, 00h, 0Eh, 00h, 00h, 00h
+		db 00h, 00h, 00h, 00h, 00h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 00h, 00h, 00h, 00h
+		db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+		db 00h, 00h, 04h, 0Fh, 0Fh, 0Ch, 04h, 00h, 04h, 0Fh, 0Ch, 04h, 04h, 00h, 00h
+		db 00h, 04h, 0Fh, 0Ch, 0Ch, 0Fh, 0Ch, 04h, 0Ch, 0Ch, 04h, 04h, 04h, 04h, 00h
+		db 04h, 0Fh, 0Fh, 0Ch, 0Fh, 0Ch, 0Ch, 0Ch, 0Ch, 0Ch, 04h, 04h, 04h, 04h, 04h
+		db 04h, 0Fh, 04h, 0Fh, 0Ch, 0Ch, 0Ch, 0Ch, 0Ch, 04h, 04h, 04h, 04h, 04h, 04h
+		db 04h, 0Ch, 04h, 0Ch, 0Ch, 0Ch, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h
+		db 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h
+		db 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h
+		db 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h
+		db 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h
+		db 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h
 	
 .code
 drawTitle macro x, y, w, h, c
@@ -152,26 +181,31 @@ local check
     push cx
     push dx
 	
-    mov ax, ballY
-    mov bx, ballX
-    mov cx, X
-    mov dx, Y
-    
-    cmp dx, ballY                       ;check if ball hits the brick
-    jl check
+    ;mov ax, ballY
+    ;mov bx, ballX
+    ;mov cx, X
+    ;mov dx, Y
 	
-    sub dx, 7
-    cmp ballY, dx
-    jl check
-    
-    mov dx, X 
-    cmp ballX, dx
-    jl check
+    mov ax, X 
+	add ax, 36
+	cmp ax, ballX 
+	jng check 
 	
-    add dx, 37
-    cmp dx, ballX
-    jl check
-    
+	mov ax, ballX 
+	add ax, 4
+	cmp X, ax
+	jnl check 
+	
+	mov ax, Y 
+	add ax, 7
+	cmp ax, ballY
+	jng check
+	
+	mov ax, ballY 
+	add ax, 4
+	cmp Y, ax
+	jnl check
+	
     call switcher                       ;if ball hits a brick, change ball direction
     DestroyBrick X, Y                   ;destroy brick
     mov Y, 300                          ;move the brick out of the way
@@ -218,44 +252,169 @@ main proc
     mov ds,ax			                   
 	
 	call setVideoMode                     ;clear screen
+	call addName 
+	call setVideoMode 
 	call StartPage                        ;initiate start page
 	call menu
 	call setVideoMode
 main endp
 
+addName proc
+	push ax
+	push bx
+	push cx
+	push dx
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 05h
+	mov dl, 0Ch
+	int 10h
+	
+	mov ah, 09h
+	lea dx, entername_text
+	int 21h
+	
+	mov cx, 5
+    mov bp, 0
+    underscore:
+		mov ah, 02h
+        mov dh, 07h
+        mov dl, 12h
+        add dx, bp 
+        inc bp
+        mov bh, 0
+        int 10h
+
+        mov ax, 092Dh
+        mov bl, 0Dh
+        mov bh, 0
+        push cx
+        mov cx, 1
+        int 10h
+        pop cx
+		loop underscore
+
+	lea si, playername
+	mov cx, 5
+	mov bp, 0
+	get_name1:
+		mov ah, 7             ;read char input
+		int 21h
+		
+		mov ah, 02h           ;set cursor position
+		mov dh, 07h  
+		mov dl, 12h
+		add dx, bp            
+		inc bp                ;move cursor position 
+		mov bh, 0
+		int 10h
+	
+		cmp al, 08h             ;if backspace is pressed, delete char 
+		jne printchar1
+		
+		mov ah, 02h
+		dec dx
+		sub bp, 2
+		dec si
+		mov bh, 00h
+		int 10h
+		
+		mov ax, 0A2Dh      
+		mov bh, 0
+		mov cx, 1
+		int 10h
+		
+		jmp get_name1
+		
+		printchar1:
+			mov ah, 0Ah
+			mov bh, 0
+			mov bl, 0Dh 
+			push cx
+			mov cx, 1
+			int 10h
+			pop cx
+		
+		mov byte ptr [si], al 
+		inc si 
+	
+	cmp bp, 5
+	je save1
+	jmp get_name1
+	
+	save1:
+		mov ah, 0h                 ;check keyboard input
+		int 16h
+		cmp ax, 1C0Dh              ;enter key
+		jne get_name 
+		
+		call StartPage
+		call menu
+		ret 
+	
+	pop ax
+	pop bx
+	pop cx
+	pop dx
+	ret
+addName endp
+
 drawLives proc
 	cmp lives, 3
 	jne twoLives
 	
-	drawTitle 303, 184, 6, 11, 4     ;draw Heart3 this is red
-	drawTitle 303, 190, 11, 6, 4
+	mov tempLifeX, 290         ;draw Heart3
+	mov tempLifeY, 181
+	call drawLife 
 	
 	twoLives:
 	cmp lives, 2
 	jl oneLife
-	drawTitle 285, 184, 6, 11, 4      ;draw Heart2 this is red
-	drawTitle 285, 190, 11, 6, 4
+	mov tempLifeX, 270         ;draw Heart2
+	mov tempLifeY, 181
+	call drawLife
 
 	oneLife:
 	cmp lives, 0
 	je noLives
-	drawTitle 267, 184, 6, 11, 4      ;draw Heart1 this is red
-	drawTitle 267, 190, 11, 6, 4
+	mov tempLifeX, 250         ;draw Heart1
+	mov tempLifeY, 181
+	call drawLife
 	
 	noLives:
 	ret
 drawLives endp
 
-removeLives proc
-	drawTitle 303, 184, 6, 11, 0     ;draw Heart3 this is red
-	drawTitle 303, 190, 11, 6, 0
+drawLife proc
+	mov cx, tempLifeX
+	mov dx, tempLifeY
+	mov si, offset life 
 	
-	drawTitle 285, 184, 6, 11, 0      ;draw Heart2 this is red
-	drawTitle 285, 190, 11, 6, 0
+	drawLife1:
+		mov ah, 0Ch 
+		mov al, [si]
+		mov bh, 00h
+		int 10h
+		
+		inc si 
+		inc cx 
+		mov ax, cx
+		sub ax, tempLifeX
+		cmp ax, 15
+		jne drawLife1 
+		
+		mov cx, tempLifeX
+		inc dx
+		mov ax, dx
+		sub ax, tempLifeY
+		cmp ax, 15
+		jne drawLife1 
+	ret 
+drawLife endp
 
-	drawTitle 267, 184, 6, 11, 0      ;draw Heart1 this is red
-	drawTitle 267, 190, 11, 6, 0
-	
+removeLives proc
+	drawTitle 249, 181, 60, 19, 0     ;draw Heart3 this is red
 	ret
 removeLives endp
 
@@ -334,6 +493,8 @@ playNext proc
 	je playLevel4
 	cmp optLevel, 4
 	je playLevel5
+	cmp optLevel, 5
+	je goToMain
 	
 	playLevel2:
 		mov optLevel, 2
@@ -350,6 +511,11 @@ playNext proc
 	playLevel5:
 		mov optLevel, 5
 		jmp play 
+		
+	goToMain:
+		call StartPage
+		call menu 
+		ret
 		
 	play:
 		call levelmode
@@ -416,6 +582,7 @@ levelMenu proc
 	push ax
 	push bx
 	push dx
+	push cx
 	
 	call setVideoMode
 	
@@ -564,6 +731,7 @@ levelMenu proc
 	pop ax
 	pop bx
 	pop dx
+	pop cx
 levelMenu endp
 
 timedmode proc
@@ -736,14 +904,14 @@ timedMenu endp
 
 BuildB proc	
 	BuildBrick brick1x, brick1y, 9
-	BuildBrick brick2x, brick2y, 9
+	BuildBrick brick2x, brick2y, 10
 	BuildBrick brick3x, brick3y, 9
 	BuildBrick brick4x, brick4y, 9
-	BuildBrick brick5x, brick5y, 9
+	BuildBrick brick5x, brick5y, 10
 	BuildBrick brick6x, brick6y, 12
-	BuildBrick brick7x, brick7y, 12
+	BuildBrick brick7x, brick7y, 11
 	BuildBrick brick8x, brick8y, 12
-	BuildBrick brick9x, brick9y, 12
+	BuildBrick brick9x, brick9y, 11
 	BuildBrick brick10x, brick10y, 12
 	ret
 BuildB endp
@@ -764,126 +932,128 @@ CollideB endp
 
 levelOne proc
 	mov brick1x, 142
-	mov brick1y, 29
+	mov brick1y, 44
 	mov brick2x, 39
-	mov brick2y, 48
+	mov brick2y, 63
 	mov brick3x, 169
-	mov brick3y, 48
+	mov brick3y, 63
 	mov brick4x, 243
-	mov brick4y, 48
+	mov brick4y, 63
 	mov brick5x, 142
-	mov brick5y, 65
+	mov brick5y, 80
 	mov brick6x, 88
-	mov brick6y, 29
+	mov brick6y, 44
 	mov brick7x, 195
-	mov brick7y, 29
+	mov brick7y, 44
 	mov brick8x, 114
-	mov brick8y, 48
+	mov brick8y, 63
 	mov brick9x, 88
-	mov brick9y, 65
+	mov brick9y, 80
 	mov brick10x, 195
-	mov brick10y, 65
+	mov brick10y, 80
 	ret
 levelOne endp
 
 levelTwo proc
-	mov brick1x, 33
-	mov brick1y, 29
-	mov brick2x, 91
-	mov brick2y, 29
-	mov brick3x, 219
-	mov brick3y, 47
-	mov brick4x, 33
-	mov brick4y, 65
-	mov brick5x, 91
-	mov brick5y, 65
-	mov brick6x, 191
-	mov brick6y, 29
-	mov brick7x, 249
-	mov brick7y, 29
-	mov brick8x, 61
-	mov brick8y, 47
-	mov brick9x, 191
-	mov brick9y, 65
-	mov brick10x, 249
-	mov brick10y, 65
+	mov brick1x, 48
+	mov brick1y, 44
+	mov brick2x, 106
+	mov brick2y, 44
+	mov brick3x, 204
+	mov brick3y, 62
+	mov brick4x, 48
+	mov brick4y, 80
+	mov brick5x, 106
+	mov brick5y, 80
+	mov brick6x, 176
+	mov brick6y, 44
+	mov brick7x, 234
+	mov brick7y, 44
+	mov brick8x, 76
+	mov brick8y, 62
+	mov brick9x, 176
+	mov brick9y, 80
+	mov brick10x, 234
+	mov brick10y, 80
 	ret
 levelTwo endp
 
 levelThree proc
 	mov brick1x, 115
-	mov brick1y, 39
+	mov brick1y, 54
 	mov brick2x, 169
-	mov brick2y, 39
+	mov brick2y, 54
 	mov brick3x, 91
-	mov brick3y, 60
+	mov brick3y, 75
 	mov brick4x, 142
-	mov brick4y, 60
+	mov brick4y, 75
 	mov brick5x, 193
-	mov brick5y, 60
+	mov brick5y, 75
 	mov brick6x, 142
-	mov brick6y, 21
+	mov brick6y, 36
 	mov brick7x, 65
-	mov brick7y, 82
+	mov brick7y, 97
 	mov brick8x, 116
-	mov brick8y, 82
+	mov brick8y, 97
 	mov brick9x, 167
-	mov brick9y, 82
+	mov brick9y, 97
 	mov brick10x, 218
-	mov brick10y, 82
+	mov brick10y, 97
 	ret
 levelThree endp
 
 levelFour proc
 	mov brick1x, 106
-	mov brick1y, 22
+	mov brick1y, 37
 	mov brick2x, 191
-	mov brick2y, 42
+	mov brick2y, 57
 	mov brick3x, 142
-	mov brick3y, 60
+	mov brick3y, 75
 	mov brick4x, 192
-	mov brick4y, 77
+	mov brick4y, 92
 	mov brick5x, 106
-	mov brick5y, 101
+	mov brick5y, 116
 	mov brick6x, 150
-	mov brick6y, 32
+	mov brick6y, 47
 	mov brick7x, 89
-	mov brick7y, 48
+	mov brick7y, 63
 	mov brick8x, 215
-	mov brick8y, 59
+	mov brick8y, 74
 	mov brick9x, 89
-	mov brick9y, 76
+	mov brick9y, 91
 	mov brick10x, 152
-	mov brick10y, 88
+	mov brick10y, 103
 	ret
 levelFour endp
 
 levelFive proc
 	mov brick1x, 71
-	mov brick1y, 44
+	mov brick1y, 59
 	mov brick2x, 118
-	mov brick2y, 44
+	mov brick2y, 59
 	mov brick3x, 167
-	mov brick3y, 44
+	mov brick3y, 59
 	mov brick4x, 215
-	mov brick4y, 44
+	mov brick4y, 59
 	mov brick5x, 142
-	mov brick5y, 83
+	mov brick5y, 98
 	mov brick6x, 94
-	mov brick6y, 24
+	mov brick6y, 39
 	mov brick7x, 190
-	mov brick7y, 24
+	mov brick7y, 39
 	mov brick8x, 95
-	mov brick8y, 63
+	mov brick8y, 78
 	mov brick9x, 142
-	mov brick9y, 63
+	mov brick9y, 78
 	mov brick10x, 191
-	mov brick10y, 63
+	mov brick10y, 78
 	ret
 levelFive endp
 
 StartPage proc
 	call setVideoMode
+	call drawBorder
+	call drawBg
 
 	drawTitle 100, 21, 24, 4, 13         ;draw B shadow
 	drawTitle 100, 50, 24, 4, 13
@@ -1367,7 +1537,8 @@ menu proc
 	int 10h
 	
 	mov ah, 09h
-	lea dx, exit_text
+	;lea dx, exit_text
+	lea dx, playername
 	int 21h
 	
 	call drawSelect
@@ -1441,8 +1612,9 @@ menu proc
 		ret
 		
 	go_options:
-		call optionsPage
-		call enable
+		;call optionsPage
+		;call enable
+		call leaderboard
 		ret
 	
 	terminate:
@@ -1592,35 +1764,37 @@ GameCompletedPage proc
 	push dx
 	
 	call setVideoMode
+	call drawBorder
+	call drawBg
 	
-	drawTitle 67, 19, 5, 19, 5          ;draw Y
-    drawTitle 73, 32, 13, 6, 5
-    drawTitle 87, 19, 5, 19, 5
-    drawTitle 77, 39, 6, 13, 5 
+	drawTitle 67, 29, 5, 19, 5          ;draw Y
+    drawTitle 73, 42, 13, 6, 5
+    drawTitle 87, 29, 5, 19, 5
+    drawTitle 77, 49, 6, 13, 5 
 	
-	drawTitle 98, 19, 6, 33, 5          ;draw O
-    drawTitle 115, 19, 4, 33, 5
-    drawTitle 120, 19, 0, 32, 5
-    drawTitle 105, 19, 9, 6, 5
-    drawTitle 105, 47, 9, 5, 5 
+	drawTitle 98, 29, 6, 33, 5          ;draw O
+    drawTitle 115, 29, 4, 33, 5
+    drawTitle 120, 29, 0, 32, 5
+    drawTitle 105, 29, 9, 6, 5
+    drawTitle 105, 57, 9, 5, 5 
 
-	drawTitle 127, 19, 6, 33, 5         ;draw U
-    drawTitle 144, 19, 6, 33, 5
-    drawTitle 127, 47, 23, 6, 5
+	drawTitle 127, 29, 6, 33, 5         ;draw U
+    drawTitle 144, 29, 6, 33, 5
+    drawTitle 127, 57, 23, 6, 5
 	
-	drawTitle 168, 19, 5, 33, 5         ;draw D
-    drawTitle 174, 19, 14, 6, 5
-    drawTitle 174, 47, 14, 5, 5
-    drawTitle 184, 23, 6, 27, 5  
+	drawTitle 168, 29, 5, 33, 5         ;draw D
+    drawTitle 174, 29, 14, 6, 5
+    drawTitle 174, 57, 14, 5, 5
+    drawTitle 184, 33, 6, 27, 5  
 	
-	drawTitle 197, 19, 23, 6, 5         ;draw I
-    drawTitle 197, 47, 23, 5, 5
-    drawTitle 206, 26, 6, 20, 5
+	drawTitle 197, 29, 23, 6, 5         ;draw I
+    drawTitle 197, 57, 23, 5, 5
+    drawTitle 206, 36, 6, 20, 5
 	
-	drawTitle 227, 19, 5, 33, 5         ;draw D
-    drawTitle 233, 19, 14, 6, 5
-    drawTitle 233, 47, 14, 5, 5
-    drawTitle 243, 23, 6, 27, 5 
+	drawTitle 227, 29, 5, 33, 5         ;draw D
+    drawTitle 233, 29, 14, 6, 5
+    drawTitle 233, 57, 14, 5, 5
+    drawTitle 243, 33, 6, 27, 5 
 	
 	drawTitle 130, 72, 23, 6, 5         ;draw I
     drawTitle 130, 99, 23, 5, 5
@@ -1642,6 +1816,7 @@ GameCompletedPage proc
     lea dx, nextlevel_text
     int 21h
 	
+	no_next:
 	mov ah, 02h
     mov bh, 00h
     mov dh, 13h
@@ -1758,60 +1933,62 @@ GameOverPage proc
 	push dx
 	
 	call setVideoMode
+	call drawBorder
+	call drawBg
 	
 	; draw G    
-	drawTitle 91, 17, 30, 6, 5       
-	drawTitle 115, 23, 6, 6, 5  
-	drawTitle 91, 23, 6, 35, 5  
-	drawTitle 97, 52, 25, 6, 5  
-	drawTitle 107, 38, 15, 6, 5  
-	drawTitle 116, 44, 6, 8, 5  
+	drawTitle 91, 32, 30, 6, 5       
+	drawTitle 115, 38, 6, 6, 5  
+	drawTitle 91, 38, 6, 35, 5  
+	drawTitle 97, 67, 25, 6, 5  
+	drawTitle 107, 53, 15, 6, 5  
+	drawTitle 116, 59, 6, 8, 5  
 
     ; draw A
-    drawTitle 127, 17, 6, 41, 5  
-    drawTitle 133, 17, 18, 6, 5  
-	drawTitle 152, 17, 6, 41, 5  
-	drawTitle 133, 35, 18, 6, 5  
+    drawTitle 127, 32, 6, 41, 5  
+    drawTitle 133, 32, 18, 6, 5  
+	drawTitle 152, 32, 6, 41, 5  
+	drawTitle 133, 50, 18, 6, 5  
 
 	; draw M
-    drawTitle 163, 17, 6, 41, 5  
-    drawTitle 169, 17, 18, 6, 5  
-	drawTitle 175, 23, 6, 18, 5  
-	drawTitle 188, 17, 6, 41, 5  
+    drawTitle 163, 32, 6, 41, 5  
+    drawTitle 169, 32, 18, 6, 5  
+	drawTitle 175, 38, 6, 18, 5  
+	drawTitle 188, 32, 6, 41, 5  
 
 	; draw E
-    drawTitle 199, 17, 6, 41, 5  
-    drawTitle 205, 17, 25, 6, 5  
-	drawTitle 205, 34, 22, 6, 5  
-	drawTitle 205, 52, 25, 6, 5  
+    drawTitle 199, 32, 6, 41, 5  
+    drawTitle 205, 32, 25, 6, 5  
+	drawTitle 205, 49, 22, 6, 5  
+	drawTitle 205, 67, 25, 6, 5  
     
 	; draw O
-    drawTitle 91, 63, 6, 41, 5  
-    drawTitle 97, 63, 19, 6, 5  
-	drawTitle 116, 63, 6, 41, 5  
-	drawTitle 97, 98, 19, 6, 5  
+    drawTitle 91, 78, 6, 41, 5  
+    drawTitle 97, 78, 19, 6, 5  
+	drawTitle 116, 78, 6, 41, 5  
+	drawTitle 97, 113, 19, 6, 5  
 	
 	; draw V
-    drawTitle 127, 63, 6, 35, 5  
-    drawTitle 152, 63, 6, 35, 5  
-	drawTitle 133, 98, 19, 6, 5  
+    drawTitle 127, 78, 6, 35, 5  
+    drawTitle 152, 78, 6, 35, 5  
+	drawTitle 133, 113, 19, 6, 5  
 
 	; draw E
-    drawTitle 163, 63, 6, 41, 5  
-    drawTitle 169, 63, 25, 6, 5  
-	drawTitle 169, 80, 22, 6, 5  
-	drawTitle 169, 98, 25, 6, 5  
+    drawTitle 163, 78, 6, 41, 5  
+    drawTitle 169, 78, 25, 6, 5  
+	drawTitle 169, 95, 22, 6, 5  
+	drawTitle 169, 113, 25, 6, 5  
 
 	; draw R
-    drawTitle 199, 63, 6, 41, 5  
-    drawTitle 205, 63, 19, 6, 5  
-	drawTitle 205, 79, 19, 6, 5  
-	drawTitle 224, 69, 6, 10, 5  
-	drawTitle 224, 85, 6, 18, 5  
+    drawTitle 199, 78, 6, 41, 5  
+    drawTitle 205, 78, 19, 6, 5  
+	drawTitle 205, 94, 19, 6, 5  
+	drawTitle 224, 84, 6, 10, 5  
+	drawTitle 224, 100, 6, 18, 5  
 	
 	mov ah, 02h
     mov bh, 00h
-    mov dh, 11h
+    mov dh, 13h
     mov dl, 10h
     int 10h
     
@@ -1821,7 +1998,7 @@ GameOverPage proc
     
     mov ah, 02h
     mov bh, 00h
-    mov dh, 13h
+    mov dh, 15h
     mov dl, 12h
     int 10h
     
@@ -1831,7 +2008,7 @@ GameOverPage proc
     
 	mov lmenu, 1
 	mov xloc, 145
-	mov yloc, 145
+	mov yloc, 161
 	mov wid, 25
     call drawSelect
 	
@@ -1873,14 +2050,14 @@ GameOverPage proc
 		backOver:
 			mov optOver, 1
 			call deleteSelect
-			mov yloc, 145          ;129 -> y location of first underline, varies
+			mov yloc, 161          ;129 -> y location of first underline, varies
 			call drawSelect
 			jmp selectOver
 		
 		nextOver:
 			mov optOver, 2
 			call deleteSelect
-			mov yloc, 161          ;177 -> y location of last underline, varies
+			mov yloc, 177          ;177 -> y location of last underline, varies
 			call drawSelect
 			jmp selectOver
 		
@@ -2046,38 +2223,62 @@ drawBoundary proc
 drawBoundary endp
 
 drawBorder proc
-	drawTitle 17, 9, 1, 1, 0Dh
-	drawTitle 60, 10, 1, 1, 0Dh
-	drawTitle 95, 15, 1, 1, 0Dh
-	drawTitle 131, 11, 1, 1, 0Dh
-	drawTitle 167, 10, 1, 1, 0Dh
-	drawTitle 247, 17, 1, 1, 0Dh
-	drawTitle 7, 46, 1, 1, 0Dh
-	drawTitle 11, 82, 1, 1, 0Dh
-	drawTitle 13, 137, 1, 1, 0Dh
-	drawTitle 7, 177, 1, 1, 0Dh
-	drawTitle 39, 191, 1, 1, 0Dh
-	drawTitle 74, 194, 1, 1, 0Dh
-	drawTitle 164, 185, 1, 1, 0Dh
-	drawTitle 217, 190, 1, 1, 0Dh
-	drawTitle 277, 195, 1, 1, 0Dh
-	drawTitle 315, 193, 1, 1, 0Dh
-	drawTitle 309, 163, 1, 1, 0Dh
-	drawTitle 302, 139, 1, 1, 0Dh
-	drawTitle 313, 91, 1, 1, 0Dh
-	drawTitle 306, 57, 1, 1, 0Dh
-	drawTitle 39, 11, 1, 1, 0Fh
-	drawTitle 112, 8, 1, 1, 0Fh
-	drawTitle 205, 12, 1, 1, 0Fh
-	drawTitle 279, 9, 1, 1, 0Fh
-	drawTitle 311, 26, 1, 1, 0Fh
-	drawTitle 306, 105, 1, 1, 0Fh
-	drawTitle 296, 187, 1, 1, 0Fh
-	drawTitle 144, 193, 1, 1, 0Fh
-	drawTitle 95, 186, 1, 1, 0Fh
-	drawTitle 7, 112, 1, 1, 0Fh
+	drawTitle 17, 9, 0, 0, 05h
+	drawTitle 60, 10, 0, 0, 05h
+	drawTitle 95, 15, 0, 0, 05h
+	drawTitle 131, 11, 0, 0, 05h
+	drawTitle 167, 10, 0, 0, 05h
+	drawTitle 247, 17, 0, 0, 05h
+	drawTitle 7, 46, 0, 0, 05h
+	drawTitle 11, 82, 0, 0, 05h
+	drawTitle 13, 137, 0, 0, 05h
+	drawTitle 7, 177, 0, 0, 05h
+	drawTitle 39, 191, 0, 0, 05h
+	drawTitle 74, 194, 0, 0, 05h
+	drawTitle 164, 185, 0, 0, 05h
+	drawTitle 217, 190, 0, 0, 05h
+	drawTitle 277, 195, 0, 0, 05h
+	drawTitle 315, 193, 0, 0, 05h
+	drawTitle 309, 163, 0, 0, 05h
+	drawTitle 302, 139, 0, 0, 05h
+	drawTitle 313, 91, 0, 0, 05h
+	drawTitle 306, 57, 0, 0, 05h
+	drawTitle 39, 11, 0, 0, 0Fh
+	drawTitle 112, 8, 0, 0, 0Fh
+	drawTitle 205, 12, 0, 0, 0Fh
+	drawTitle 279, 9, 0, 0, 0Fh
+	drawTitle 311, 26, 0, 0, 0Fh
+	drawTitle 306, 105, 0, 0, 0Fh
+	drawTitle 296, 187, 0, 0, 0Fh
+	drawTitle 144, 193, 0, 0, 0Fh
+	drawTitle 95, 186, 0, 0, 0Fh
+	drawTitle 7, 112, 0, 0, 0Fh
 	ret
 drawBorder endp
+
+drawBg proc
+	drawTitle 55, 43, 0, 0, 05h
+	drawTitle 186, 51, 0, 0, 05h
+	drawTitle 265, 58, 0, 0, 05h
+	drawTitle 73, 94, 0, 0, 05h
+	drawTitle 135, 87, 0, 0, 05h
+	drawTitle 59, 130, 0, 0, 05h
+	drawTitle 249, 122, 0, 0, 05h
+	drawTitle 103, 154, 0, 0, 05h
+	drawTitle 161, 140, 0, 0, 05h
+	drawTitle 258, 163, 0, 0, 05h
+	drawTitle 105, 52, 0, 0, 0Fh
+	drawTitle 152, 45, 0, 0, 0Fh
+	drawTitle 245, 51, 1, 1, 0Fh
+	drawTitle 45, 69, 1, 1, 0Fh
+	drawTitle 200, 98, 0, 0, 0Fh
+	drawTitle 277, 101, 0, 0, 0Fh
+	drawTitle 95, 114, 0, 0, 0Fh
+	drawTitle 60, 166, 0, 0, 0Fh
+	drawTitle 139, 152, 1, 1, 0Fh
+	drawTitle 218, 151, 0, 0, 0Fh
+	ret 
+drawBg endp
 
 draw proc
     push ax
