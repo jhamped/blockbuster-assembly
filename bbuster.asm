@@ -20,20 +20,10 @@ EXTERNDELAY = 3
 	ones dw 57
 	timeCtr db 0
 	
-	blockbuster_text db 'BLOCK BUSTER', '$'
-	start_text db 'Press S to start', '$'
-	gameover_text db 'GAME OVER', '$'
-	gamecompleted_text db 'That is it for now', '$'
-	
 	entername_text db 'ENTER YOUR NAME:', '$'
-	;playername db 3 dup(0) 
 	playername db 'twice', '$'
-	;filename db 'names.txt', 0
-	handle dw ?
-	scores db 00h, 6*50 dup (0) 
-	iscore db 000h, 010h
-	snake_length dw 0
-	strbuf db 4 dup(?)
+	nameLength_text db 'Name should be', '$'
+	nameLength_text1 db 'EXACTLY 5 characters', '$'
 	
 	levelmode_text db 'LEVEL MODE', '$'
 	timedmode_text db 'TIMED MODE','$'
@@ -270,11 +260,31 @@ addName proc
 	call drawBg
 	call drawName 
 	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 12h
+	mov dl, 0Eh
+	int 10h
+	
+	mov ah, 09h
+	lea dx, nameLength_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 14h
+	mov dl, 0Ah
+	int 10h
+	
+	mov ah, 09h
+	lea dx, nameLength_text1
+	int 21h
+	
 	mov cx, 5
     mov bp, 0
     underscore:
 		mov ah, 02h
-        mov dh, 11h
+        mov dh, 0Fh
         mov dl, 12h
         add dx, bp 
         inc bp
@@ -282,7 +292,7 @@ addName proc
         int 10h
 
         mov ax, 092Dh
-        mov bl, 0Fh
+        mov bl, 09h
         mov bh, 0
         push cx
         mov cx, 1
@@ -298,7 +308,7 @@ addName proc
 		int 21h
 		
 		mov ah, 02h           ;set cursor position
-		mov dh, 11h  
+		mov dh, 0Fh  
 		mov dl, 12h
 		add dx, bp            
 		inc bp                ;move cursor position 
@@ -325,7 +335,7 @@ addName proc
 		printchar1:
 			mov ah, 0Ah
 			mov bh, 0
-			mov bl, 0Fh 
+			mov bl, 09h 
 			push cx
 			mov cx, 1
 			int 10h
@@ -354,6 +364,20 @@ addName proc
 	pop dx
 	ret
 addName endp
+
+printName proc
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 01h
+	mov dl, 22h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, playername
+	int 21h
+	
+	ret 
+printName endp 
 
 drawName proc
 	drawTitle 78, 49, 4, 20, 0Dh         ;draw E 
@@ -633,6 +657,7 @@ levelmode proc
 
 	next:
 		call BuildB
+		call printName
 		redrawStriker 13
 		redrawBall 15
 		call gameLoop
@@ -648,6 +673,7 @@ levelMenu proc
 	call setVideoMode
 	call drawBorder
 	call drawBg
+	call printName 
 	
 	mov ah, 02h
 	mov bh, 00h
@@ -817,6 +843,7 @@ timedMenu proc
 	call setVideoMode
 	call drawBorder
 	call drawBg
+	call printName
 	
 	mov ah, 02h
 	mov bh, 00h
@@ -1215,12 +1242,12 @@ StartPage proc
 	drawTitle 239, 65, 4, 18, 5
 	drawTitle 235, 80, 4, 19, 5
 	
+	call printName
+	
 	ret
 StartPage endp
 
 optionsPage proc
-
-    ; Clear the screen in graphics mode
     call setVideoMode
 
     ; Draw E
@@ -1602,8 +1629,7 @@ menu proc
 	int 10h
 	
 	mov ah, 09h
-	;lea dx, exit_text
-	lea dx, playername
+	lea dx, exit_text
 	int 21h
 	
 	call drawSelect
@@ -1830,6 +1856,7 @@ GameCompletedPage proc
 	call setVideoMode
 	call drawBorder
 	call drawBg
+	call printName
 	
 	drawTitle 67, 29, 5, 19, 5          ;draw Y
     drawTitle 73, 42, 13, 6, 5
@@ -1999,6 +2026,7 @@ GameOverPage proc
 	call setVideoMode
 	call drawBorder
 	call drawBg
+	call printName
 	
 	; draw G    
 	drawTitle 91, 32, 30, 6, 5       
