@@ -357,7 +357,7 @@ redrawStriker macro newColor
 endm
 
 BrickCollision macro X, Y
-local check
+local check, done1
     push ax
     push bx
     push cx
@@ -392,7 +392,7 @@ local check
 	mov begin, 0                        ;stop gameloop
 	redrawball 0
 	redrawStriker 0
-    call GameCompletedPage
+	call GameCompletedPage
     
     check:
     pop dx
@@ -1689,6 +1689,7 @@ StartPage proc
 	cmp control, 1
 	je draw_control
 	
+	call drawMenuText
 	call menu
 	call printName
 	jmp done
@@ -1719,6 +1720,74 @@ StartPage proc
 	done:
 	ret
 StartPage endp
+
+drawMenuText proc
+	drawTitle 114, 34, 6, 23, 5            ;draw M shadow
+	drawTitle 114, 34, 25, 6, 5
+	drawTitle 124, 34, 6, 11, 5
+	drawTitle 134, 34, 6, 23, 5
+	drawTitle 113, 33, 6, 23, 13            ;draw M
+	drawTitle 113, 33, 25, 6, 13
+	drawTitle 123, 33, 6, 11, 13
+	drawTitle 133, 33, 6, 23, 13
+	
+	drawTitle 145, 34, 6, 23, 5            ;draw A shadow 
+	drawTitle 145, 34, 19, 6, 5
+	drawTitle 159, 34, 6, 23, 5
+	drawTitle 145, 45, 19, 6, 5
+	drawTitle 144, 33, 6, 23, 13            ;draw A
+	drawTitle 144, 33, 19, 6, 13
+	drawTitle 158, 33, 6, 23, 13
+	drawTitle 144, 44, 19, 6, 13
+	
+	drawTitle 169, 34, 21, 6, 5            ;draw I shadow
+	drawTitle 177, 34, 6, 23, 5
+	drawTitle 169, 51, 21, 6, 5
+	drawTitle 168, 33, 21, 6, 13            ;draw I
+	drawTitle 176, 33, 6, 23, 13
+	drawTitle 168, 50, 21, 6, 13
+	
+	drawTitle 195, 34, 6, 23, 5            ;draw N shadow 
+	drawTitle 195, 34, 19, 6, 5
+	drawTitle 209, 34, 6, 23, 5
+	drawTitle 194, 33, 6, 23, 13            ;draw N
+	drawTitle 194, 33, 19, 6, 13
+	drawTitle 208, 33, 6, 23, 13
+	
+	drawTitle 114, 65, 6, 23, 5            ;draw M shadow
+	drawTitle 114, 65, 25, 6, 5
+	drawTitle 124, 65, 6, 11, 5
+	drawTitle 134, 65, 6, 23, 5
+	drawTitle 113, 64, 6, 23, 13            ;draw M
+	drawTitle 113, 64, 25, 6, 13
+	drawTitle 123, 64, 6, 11, 13
+	drawTitle 133, 64, 6, 23, 13
+	
+	drawTitle 145, 65, 6, 23, 5            ;draw E shadow 
+	drawTitle 145, 65, 19, 6, 5
+	drawTitle 145, 73, 13, 6, 5
+	drawTitle 145, 82, 19, 6, 5
+	drawTitle 144, 64, 6, 23, 13            ;draw E
+	drawTitle 144, 64, 19, 6, 13
+	drawTitle 144, 72, 13, 6, 13
+	drawTitle 144, 81, 19, 6, 13
+	
+	drawTitle 170, 65, 6, 23, 5            ;draw N shadow
+	drawTitle 170, 65, 19, 6, 5
+	drawTitle 184, 65, 6, 23, 5
+	drawTitle 169, 64, 6, 23, 13            ;draw N
+	drawTitle 169, 64, 19, 6, 13
+	drawTitle 183, 64, 6, 23, 13
+	
+	drawTitle 195, 65, 6, 23, 5            ;draw U shadow
+	drawTitle 195, 82, 19, 6, 5
+	drawTitle 209, 65, 6, 23, 5
+	drawTitle 194, 64, 6, 23, 13            ;draw U
+	drawTitle 194, 81, 19, 6, 13
+	drawTitle 208, 64, 6, 23, 13
+	
+	ret 
+drawMenuText endp 
 
 optionsPage proc
     call setVideoMode
