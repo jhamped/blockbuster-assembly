@@ -6,6 +6,30 @@ entry:
 EXTERNDELAY = 3
 
 .data
+
+; ----------------------------------------
+; ACCESS THE BITMAP IMAGE
+; ----------------------------------------
+	OpeningFileName					db	'Assets/Opening.bmp',0
+	OpeningFileHandle				dw	?
+
+	FileReadBuffer					db	320 dup (?)
+
+;Debug strings:
+	DebugBool						db	0
+	OpenErrorMsg			db	'File Open Error', 10,'$'
+	FileNotFoundMsg			db	'File not found$' ;error code 2
+	TooManyOpenFilesMsg		db	'Too many open files$' ;error code 4
+	AccessDeniedMsg			db	'Access Denied$' ;error code 5
+	InvalidAccessMsg		db	'Invalid Access$' ;error code 12
+	UnknownErrorMsg			db	'Unknown Error$'
+
+	CloseErrorMsg			db	'File Close Error', 10,'$'
+
+	PointerSetErrorMsg		db	'Pointer Set Error', 10, '$'
+	ReadErrorMsg			db	'Read Error', 10, '$'
+;Debug strings:
+
 	score_text db 'Time Consumed: $'
 	timeScore dw 0
 	scoreCount dw 0
@@ -24,6 +48,16 @@ EXTERNDELAY = 3
 	playername db 'twice', '$'
 	nameLength_text db 'Name should be', '$'
 	nameLength_text1 db 'EXACTLY 5 characters', '$'
+	
+	controlB_text db '[B]Back', '$'
+	control1_text db 'MOVE PADDLE', '$'
+	control2_text db 'TOGGLE MENUS', '$'
+	control3_text db 'SELECT', '$'
+	controlL_text db 'LEVEL', '$'
+	controlT_text db 'TIMED', '$'
+	controlO_text db 'OPTIONS', '$'
+	controlE_text db 'EXIT', '$'
+	controlU_text db 'USING', '$'
 	
 	levelmode_text db 'LEVEL MODE', '$'
 	timedmode_text db 'TIMED MODE','$'
@@ -50,6 +84,7 @@ EXTERNDELAY = 3
 	optLevel db 1
 	currentOpt db 1
 	lmenu db 1
+	control db 1
 	
 	xlocRec dw 0
 	ylocRec dw 0
@@ -58,6 +93,10 @@ EXTERNDELAY = 3
 	
 	tempLifeX dw 0
 	tempLifeY dw 0
+	tempX dw 0
+	tempY dw 0
+	tempW dw 0
+	tempH dw 0
 	
 	ballY dw 163                   ;initial Y location of ball
 	ballX dw 158                   ;initial X location of ball
@@ -129,8 +168,161 @@ EXTERNDELAY = 3
 		db 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h
 		db 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h
 		db 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h
-	
+		
+	down_key db 00h, 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h, 00h
+       db 00h, 00h, 05h, 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h, 00h
+       db 00h, 00h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h, 00h
+       db 05h, 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh, 05h
+       db 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 00h, 00h
+       db 00h, 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh, 0Fh, 00h, 00h
+       db 00h, 00h, 00h, 00h, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 00h, 00h, 00h, 00h
+
+	up_key db 00h, 00h, 00h, 00h, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 00h, 00h, 00h, 00h
+     db 00h, 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh, 0Fh, 00h, 00h
+     db 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 00h, 00h
+     db 05h, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+     db 05h, 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h
+     db 00h, 00h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h, 00h
+     db 00h, 00h, 05h, 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h, 00h
+     db 00h, 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h, 00h
+
+	left_key db 00h, 00h, 00h, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 05h, 00h, 00h, 00h
+       db 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h, 00h, 00h
+       db 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h
+       db 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h
+       db 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+       db 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h
+       db 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h
+       db 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h
+       db 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h, 00h, 00h
+       db 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h
+
+	right_key db 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h
+        db 00h, 00h, 00h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 00h, 00h, 00h
+        db 00h, 05h, 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh, 0Fh, 00h
+        db 00h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 00h
+        db 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh
+        db 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh
+        db 00h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 00h
+        db 00h, 05h, 05h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 0Fh, 0Fh, 00h
+        db 00h, 00h, 00h, 05h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Fh, 00h, 00h, 00h
+        db 00h, 00h, 00h, 05h, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 00h, 00h, 00h
+
+	enter_key db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 05h, 00h, 00h, 00h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 00h, 00h, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h
+        db 00h, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 00h, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 00h
+        db 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h
+        db 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h
+
 .code
+
 drawTitle macro x, y, w, h, c
 	mov xlocRec, x
 	mov ylocRec, y
@@ -170,12 +362,7 @@ local check
     push bx
     push cx
     push dx
-	
-    ;mov ax, ballY
-    ;mov bx, ballX
-    ;mov cx, X
-    ;mov dx, Y
-	
+
     mov ax, X 
 	add ax, 36
 	cmp ax, ballX 
@@ -237,16 +424,251 @@ local drawscore1, noSound
     pop ax
 endm
 
+BuildKey macro X, Y, W, H 
+local drawKey 
+	push ax
+    push bx
+    push cx
+    push dx
+	
+	mov cx, X 
+	mov dx, Y 
+	
+	drawKey:
+		mov ah, 0Ch 
+		mov al, [si]
+		mov bh, 00h
+		int 10h
+		
+		inc si 
+		inc cx 
+		mov ax, cx
+		sub ax, X 
+		cmp ax, W 
+		jne drawKey  
+		
+		mov cx, X
+		inc dx
+		mov ax, dx
+		sub ax, Y
+		cmp ax, H 
+		jne drawKey 
+		
+	pop dx
+    pop cx
+    pop bx
+    pop ax
+endm 
+; ----------------------------------------
+; OpenFile and CloseFile procedures
+; ----------------------------------------
+OpenFile proc 
+	push bp 
+	mov bp, sp 
+
+	mov ah, 3Dh                ;open file
+	mov al, 2                  ;read/write access 
+	mov dx, [bp + 6]           ;moves the offset 
+	int 21h 
+
+	jc printError 
+
+	mov bx, [bp + 4] 
+	mov [bx], ax 
+
+	mov ax, 1
+
+	jmp procEndOpenFile
+
+printError:
+	cmp [byte ptr DebugBool], 0 
+	je @@zeroAX
+
+	push ax 
+
+	mov ah, 2
+	xor bh, bh
+	xor dx, dx
+	int 10h
+	
+	;Print error message if got an error opening the file:
+	mov dx, offset OpenErrorMsg
+	mov ah, 9
+	int 21h
+
+	pop ax ;get error code
+
+	;print appropriate error message:
+	cmp ax, 2
+	je @@printNotFound
+
+	cmp ax, 4
+	je @@printTooManyFiles
+
+	cmp ax, 5
+	je @@printAccessDenied
+
+	cmp ax, 12
+	je @@printInvalidAccess
+
+
+	;print unknown error:
+	mov dx, offset UnknownErrorMsg
+	mov ah, 9
+	int 21h
+	jmp @@zeroAX
+
+@@printNotFound:
+	mov dx, offset FileNotFoundMsg
+	mov ah, 9
+	int 21h
+	jmp @@zeroAX
+
+@@printTooManyFiles:
+	mov dx, offset TooManyOpenFilesMsg
+	mov ah, 9
+	int 21h
+	jmp @@zeroAX
+
+@@printAccessDenied:
+	mov dx, offset AccessDeniedMsg
+	mov ah, 9
+	int 21h
+	jmp @@zeroAX
+
+@@printInvalidAccess:
+	mov dx, offset InvalidAccessMsg
+	mov ah, 9
+	int 21h
+
+@@zeroAX:
+	xor ax, ax
+
+procEndOpenFile:
+	pop bp 
+	ret 4 
+OpenFile endp 
+
+CloseFile proc 
+	push bp
+	mov bp, sp 
+
+	mov bx, [bp + 4] 
+	mov ah, 3Eh 
+	int 21h
+
+	jnc procEndCloseFIle 
+
+	;Print error if got an error closing the file:
+	mov dx, offset CloseErrorMsg
+	mov ah, 9
+	int 21h
+
+procEndCloseFIle:
+	pop bp
+	ret ;2 
+CloseFile endp
+
+; ----------------------------------------
+; Printing the Bitmap Image procedure
+; ----------------------------------------
+PrintFullScreenBMP proc 
+	push bp 
+	mov bp, sp 
+
+	;Set file pointer to start of data:
+	xor al, al 							;sets AL to 00
+	mov bx, [bp + 6]                    
+	xor cx, cx
+	mov dx, 1077 
+	mov ah, 42h
+	int 21h
+
+	jc @@printErrorSettingPointer
+
+	jmp @@readFile
+
+@@printErrorSettingPointer:
+	mov dx, offset PointerSetErrorMsg
+	mov ah, 9
+	int 21h
+	jmp @@procEndFullScreenBMP
+
+@@readFile:
+	mov ax, 0A000h                  ;0A000h -> VGA segment address
+	mov es, ax
+	mov di, 0F8BFh
+
+	cld                             ;clear direction flag -> makes sure that the bytes are getting read in the right direction
+
+	mov cx, 200                     ;height of the image / number of iterations in which readLine is processed
+
+@@readLine:
+	push cx 
+
+	mov cx, 320                     ;number of pixels to be read in each line 
+	mov dx, [bp + 4] 
+	mov ah, 3Fh                     ;read file 
+	int 21h
+
+	mov si, dx 					     
+	mov cx, 320
+	rep movsb                       ;copies the bytes from the bmp (buffer) to the VGA memory
+
+	sub di, 640                     ;moves the di (destination index) to the next line
+
+	pop cx 
+	loop @@readLine
+
+@@procEndFullScreenBMP:
+	pop bp 
+	ret 4 
+PrintFullScreenBMP endp 
+
+; ----------------------------------------
+; Opening Page procedure
+; ----------------------------------------
+PrintOpeningPage proc  
+	call setVideoMode
+	
+	printOpening:
+		push offset OpeningFileName
+		push offset OpeningFileHandle
+		call OpenFile
+
+		push [OpeningFileHandle]
+		push offset FileReadBuffer
+		call PrintFullScreenBMP
+
+		push [OpeningFileHandle]
+		call CloseFile
+	
+	getKeyOpening:
+		mov ah, 0h                          ;check keyboard input
+		int 16h
+		cmp ah, 19h                         ;check if P is pressed 
+		je procEndOpening                   
+		cmp ah, 2Eh                         ;check if C is pressed 
+		je procEndOpening1  
+		jmp getKeyOpening                   ;if not, loop to getKeyOpening until P or C is pressed
+		
+	procEndOpening:
+		call addName 
+		ret
+	
+	procEndOpening1:
+		call StartPage
+		ret
+	
+PrintOpeningPage endp 
+
 main proc
     mov ax,@data                          ;incorporate the data values
-    mov ds,ax			                   
+    mov ds,ax			        
 	
-	call setVideoMode                     ;clear screen
-	call addName 
 	call setVideoMode 
-	call StartPage                        ;initiate start page
-	call menu
-	call setVideoMode
+	call PrintOpeningPage                 ;print opening screen
+	call setVideoMode 
 main endp
 
 addName proc
@@ -255,15 +677,17 @@ addName proc
 	push cx
 	push dx
 	
+	call setVideoMode
 	call drawBoundary
 	call drawBorder
 	call drawBg
 	call drawName 
+	mov control, 0
 	
 	mov ah, 02h
 	mov bh, 00h
 	mov dh, 12h
-	mov dl, 0Eh
+	mov dl, 0Dh
 	int 10h
 	
 	mov ah, 09h
@@ -355,7 +779,6 @@ addName proc
 		jne get_name 
 		
 		call StartPage
-		call menu
 		ret 
 	
 	pop ax
@@ -503,6 +926,125 @@ removeLives proc
 	ret
 removeLives endp
 
+drawControl proc
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 31h
+	mov dl, 09h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlB_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 03h
+	mov dl, 06h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, control1_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 04h
+	mov dl, 09h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlU_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 03h
+	mov dl, 17h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, control2_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 04h
+	mov dl, 1Bh
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlU_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 2Ch
+	mov dl, 0Eh
+	int 10h
+	
+	mov ah, 09h
+	lea dx, control3_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 2Dh
+	mov dl, 0Eh
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlU_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 08h
+	mov dl, 19h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlL_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Ah
+	mov dl, 19h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlT_text
+	int 21h
+	
+	mov ah, 02h
+	mov bh, 00h
+	mov dh, 0Ch
+	mov dl, 18h
+	int 10h
+	
+	mov ah, 09h
+	lea dx, controlO_text
+	int 21h
+	
+	mov si, offset down_key
+	BuildKey 257, 81, 25, 28
+	
+	mov si, offset up_key
+	BuildKey 257, 51, 25, 28
+	
+	mov si, offset enter_key
+	BuildKey 235, 125, 51, 41
+	
+	mov si, offset left_key
+	BuildKey 59, 57, 28, 25
+	
+	mov si, offset right_key
+	BuildKey 89, 57, 28, 25
+	
+	ret 
+drawControl endp
+
 printTime proc
 	push ax
 	push dx
@@ -599,7 +1141,6 @@ playNext proc
 		
 	goToMain:
 		call StartPage
-		call menu 
 		ret
 		
 	play:
@@ -814,7 +1355,6 @@ levelMenu proc
 	
 	backMenu:
 		call StartPage
-		call menu
 		ret 
 	
 	pop ax
@@ -986,7 +1526,6 @@ timedMenu proc
 		
 	backMenu1:
 		call StartPage
-		call menu
 		ret
 		
 	pop ax
@@ -1147,103 +1686,37 @@ StartPage proc
 	call drawBorder
 	call drawBg
 
-	drawTitle 100, 21, 24, 4, 13         ;draw B shadow
-	drawTitle 100, 50, 24, 4, 13
-	drawTitle 121, 21, 4, 32, 13
-	drawTitle 104, 21, 4, 32, 13
-	drawTitle 104, 36, 20, 4, 13
-	drawTitle 98, 19, 24, 4, 5          ;draw B
-	drawTitle 98, 48, 24, 4, 5
-	drawTitle 119, 19, 4, 32, 5
-	drawTitle 102, 19, 4, 32, 5
-	drawTitle 102, 34, 20, 4, 5
-
-	drawTitle 132, 21, 4, 32, 13        ;draw L shadow
-	drawTitle 132, 50, 16, 4, 13
-	drawTitle 130, 19, 4, 32, 5         ;draw L
-	drawTitle 130, 48, 16, 4, 5
+	cmp control, 1
+	je draw_control
 	
-	drawTitle 154, 21, 21, 4, 13        ;draw O shadow
-	drawTitle 154, 50, 21, 4, 13
-	drawTitle 154, 21, 4, 32, 13
-	drawTitle 172, 21, 4, 32, 13
-	drawTitle 152, 19, 21, 4, 5         ;draw O
-	drawTitle 152, 48, 21, 4, 5
-	drawTitle 152, 19, 4, 32, 5
-	drawTitle 170, 19, 4, 32, 5
-	
-	drawTitle 182, 21, 18, 4, 13        ;draw C shadow
-	drawTitle 182, 50, 18, 4, 13
-	drawTitle 182, 21, 4, 32, 13
-	drawTitle 180, 19, 18, 4, 5         ;draw C
-	drawTitle 180, 48, 18, 4, 5
-	drawTitle 180, 19, 4, 32, 5
-	
-	drawTitle 206, 21, 4, 33, 13        ;draw K shadow
-	drawTitle 206, 34, 20, 4, 13
-	drawTitle 220, 21, 4, 16, 13
-	drawTitle 223, 34, 4, 20, 13
-	drawTitle 204, 19, 4, 33, 5         ;draw K
-	drawTitle 204, 32, 20, 4, 5
-	drawTitle 218, 19, 4, 16, 5
-	drawTitle 221, 32, 4, 20, 5
-	
-	drawTitle 84, 67, 25, 4, 13         ;draw B shadow
-	drawTitle 84, 97, 25, 4, 13
-	drawTitle 106, 67, 4, 33, 13
-	drawTitle 88, 67, 4, 33, 13
-	drawTitle 88, 83, 21, 4, 13
-	drawTitle 82, 65, 25, 4, 5          ;draw B
-	drawTitle 82, 95, 25, 4, 5
-	drawTitle 104, 65, 4, 33, 5
-	drawTitle 86, 65, 4, 33, 5
-	drawTitle 86, 81, 21, 4, 5
-	
-	drawTitle 116, 67, 4, 33, 13        ;draw U shadow
-	drawTitle 134, 67, 4, 33, 13
-	drawTitle 116, 97, 21, 4, 13
-	drawTitle 114, 65, 4, 33, 5         ;draw U
-	drawTitle 132, 65, 4, 33, 5
-	drawTitle 114, 95, 21, 4, 5
-	
-	drawTitle 146, 67, 18, 4, 13         ;draw S shadow
-	drawTitle 146, 97, 17, 4, 13
-	drawTitle 146, 67, 4, 16, 13
-	drawTitle 160, 81, 4, 20, 13
-	drawTitle 146, 81, 17, 4, 13
-	drawTitle 144, 65, 18, 4, 5          ;draw S
-	drawTitle 144, 95, 17, 4, 5
-	drawTitle 144, 65, 4, 16, 5
-	drawTitle 158, 79, 4, 20, 5
-	drawTitle 144, 79, 17, 4, 5
-	
-	drawTitle 171, 67, 21, 4, 13        ;draw T shadow
-	drawTitle 180, 67, 4, 34, 13
-	drawTitle 169, 65, 21, 4, 5         ;draw T 
-	drawTitle 178, 65, 4, 34, 5
-	
-	drawTitle 198, 67, 4, 33, 13        ;draw E shadow
-	drawTitle 198, 67, 18, 4, 13
-	drawTitle 198, 83, 16, 4, 13
-	drawTitle 198, 97, 18, 4, 13
-	drawTitle 196, 65, 4, 33, 5         ;draw E
-	drawTitle 196, 65, 18, 4, 5
-	drawTitle 196, 81, 16, 4, 5
-	drawTitle 196, 95, 18, 4, 5
-	
-	drawTitle 222, 67, 4, 34, 13         ;draw R shadow
-	drawTitle 222, 67, 22, 4, 13
-	drawTitle 222, 82, 22, 4, 13
-	drawTitle 241, 67, 4, 18, 13
-	drawTitle 237, 82, 4, 19, 13
-	drawTitle 220, 65, 4, 34, 5         ;draw R
-	drawTitle 220, 65, 22, 4, 5
-	drawTitle 220, 80, 22, 4, 5
-	drawTitle 239, 65, 4, 18, 5
-	drawTitle 235, 80, 4, 19, 5
-	
+	call menu
 	call printName
+	jmp done
 	
+	draw_control:
+		drawTitle 18, 11, 285, 6, 13
+		drawTitle 18, 11, 6, 35, 13
+		drawTitle 298, 11, 6, 35, 13
+		drawTitle 158, 11, 6, 167, 13
+		drawTitle 18, 149, 6, 28, 13
+		drawTitle 298, 149, 6, 28, 13
+		drawTitle 18, 173, 285, 6, 13
+		drawTitle 52, 103, 31, 6, 12
+		drawTitle 102, 103, 31, 6, 12
+		drawTitle 64, 132, 5, 5, 15
+		drawTitle 75, 150, 37, 4, 13
+		
+		call drawControl
+		drawTitle 206, 74, 25, 0, 13
+		
+		get_key:
+			mov ah, 0h                 ;check keyboard input
+			int 16h
+			cmp ah, 30h                ;B key 
+			jne get_key 
+			call PrintOpeningPage
+	
+	done:
 	ret
 StartPage endp
 
@@ -1451,8 +1924,7 @@ enable proc
 		  
 		returnToMenu:
 		  	call StartPage
-			call menu          ; Display the main menu
-		  	ret             ; Return from the enable procedure
+		  	ret; Return from the enable procedure
 
 enable endp
 
@@ -1794,8 +2266,6 @@ checkKeyboard proc
     je  rightKey
     cmp ax, 4B00h		                ;check if the left-key arrow is pressed
     je leftKey
-    cmp al, 27D                         ;check if ESC key is pressed
-    je exit
     
     noInput:
 		ret  
@@ -2004,7 +2474,6 @@ GameCompletedPage proc
 
 	backMain:
 		call StartPage
-		call menu
 		ret
 		
 	quit:
@@ -2162,7 +2631,6 @@ GameOverPage proc
 
 	backMain1:
 		call StartPage
-		call menu
 		ret
 		
 	quit1:
