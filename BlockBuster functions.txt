@@ -1,0 +1,143 @@
+-----------------------
+       Macros
+-----------------------
+drawTitle          --> x, y, w, h, c  --> moves arguments to specific variables to draw a line based on them 
+redrawBall         --> newColor       --> redraws ball based on specified color (used for the movement of the ball, and removing the ball from the screen) 
+redrawStriker      --> newColor       --> redraws striker, similar to redrawBall 
+BuildKey           --> X, Y, W, H     --> draws the specified key bitmap based on the arguments 
+BuildBrick         --> X, Y, C        --> receives bricks arguments, and calls a function to draw them 
+BrickCollision     --> X, Y           --> checks if ball hits the brick located at the specified coordinates  
+DestroyBrick       --> X, Y           --> calls a function to remove the bricks located at the specified coordinates, and calls the beep sound if sound is enabled
+
+
+-----------------------
+      Title Page
+-----------------------
+OpenFile           --> opens file defined in the data segment
+CloseFile          --> closes opened file 
+PrintFullScreenBMP --> reads the contents of the opened file and prints them on the screen pixel by pixel 
+PrintOpeningPage   --> pushes necessary variables (filename, filehandle, filebuffer) on the stack to print the bmp
+
+
+-----------------------
+    Controls Page
+-----------------------
+drawControl        --> shows the key controls to navigate the game  
+
+
+-----------------------
+        Name
+-----------------------
+drawName           --> draws the "ENTER YOUR NAME" text
+addName            --> prints note and accepts string from player
+printName          --> prints name into screen
+
+
+-----------------------
+       Main Menu
+-----------------------
+StartPage          --> draws main menu text, and/ or controls page borders
+drawMenuText       --> draws the "MAIN MENU" text 
+menu               --> prints menus, and accepts chosen opt (LEVEL MODE, TIMED MODE, OPTIONS, EXIT)
+
+
+-----------------------
+     Options Page
+-----------------------
+optionsPage        --> draws the "ENABLE SOUNDS?" text
+enable             --> prints menus, and accepts chosen opt (YES, NO, BACK)
+
+
+-----------------------
+    Gameplay Menu
+-----------------------
+levelMenu          --> prints level menus, and accepts chosen opt (LEVEL 1-5) 
+timedMenu          --> prints level menus, and accepts chosen opt (LEVEL 1-5)
+levelmode          --> prepares game based on chosen level (brick layout, ball speed)
+playNext           --> advances the current level to the next level 
+
+
+-----------------------
+    Bricks Layout
+-----------------------
+levelOne           --> prints bricks layout of L1 (three rows, speed = 0) 
+levelTwo           --> prints brick layout of L2 (two groups of 5, speed = 0)  
+levelThree         --> prints brick layout of L3 (triangle, speed = 1) 
+levelFour          --> prints brick layout of L4 (jet, speed = 1) 
+levelFive          --> prints brick layout of L5 (heart, speed = 2)
+
+
+-----------------------
+       Bricks
+-----------------------
+BuildB             --> passes bricks coordinates to the BuildBrick macro
+AddBrick           --> draws bricks on the screen 
+CollideB           --> passes bricks coordinates to the BrickCollision macro 
+RemoveBrick        --> removes bricks from the screen (draws bricks in black, and moves them) 
+
+
+-----------------------
+        Ball
+-----------------------
+drawball           --> draws ball on the screen
+Collisionwall      --> checks if ball collides with the wall/ boundaries
+CollisionStriker   --> checks if ball collides with the striker
+ballMove           --> moves the ball in the direction specified (left and up at first) 
+switcher           --> changes the ball's direction
+
+
+-----------------------
+       Striker
+-----------------------
+drawStriker        --> draws the striker on the screen
+
+
+-----------------------
+        Lives
+-----------------------
+drawLives          --> determines how many hearts will be drawn after every gameloop and their coordinates 
+drawLife           --> draws heart(s) on the screen  
+removeLives        --> removes the hearts on the screen
+
+
+-----------------------
+        Timer
+-----------------------
+printTime          --> prints time to the screen, counts down every second
+stopTime           --> stops time when it reaches zero
+
+
+-----------------------
+       Game Loop
+-----------------------
+gameloop           --> calls necessary functions in the gameplay, and loops the game until completion or failure 
+checkKeyboard      --> checks the keyboard input during the gameplay for controls 
+
+
+-----------------------
+        Score
+-----------------------
+DrawScores         --> draws the "Time Consumed" text 
+computeScore       --> computes the time the player consumed in timed mode (score = 60 - remaining time) 
+printScore         --> fetches the score from the stack, and prints it on the screen
+
+
+-----------------------
+   Game Result Pages
+-----------------------
+GameCompletedPage  --> draws the "YOU DID IT" text indicating level completion, and prints menus (NEXT, MAIN MENU, EXIT) 
+GameOverPage       --> draws the "GAME OVER" text indicating level failure, and prints menus (MAIN MENU, EXIT) 
+
+
+-----------------------
+         Misc
+-----------------------
+setVideoMode       --> sets the video mode to VGA, and clears the screen
+drawSelect         --> draws the underline on the menus to indicate selected option 
+deleteSelect       --> removes the underline (happens when a key is pressed, moving/ redrawing the underline to a new position) 
+drawBoundary       --> draws the boundary/ walls on the gameplay screen
+drawBorder         --> adds stars outside the boundary (used inside and outside of the gameplay)
+drawBg             --> adds starts on the screen (used outside of the gameplay)
+draw               --> draws ball, striker, and boundary (prints colored pixel on the screen)
+sleep              --> continues the loop 
+beep               --> creates a 'beep' sound (called when a brick is destroyed, and when a menu is selected) 
