@@ -3,53 +3,30 @@
 .code
 org 100h
 entry:
-EXTERNDELAY = 3
+EXTERNDELAY = 3                                               ;delay for the movement and speed of the ball 
 
 .data
+	OpeningFileName	db	'Assets/Opening.bmp',0                ;title page bitmap 
+	OpeningFileHandle dw ?                                    
+	FileReadBuffer db 320 dup (?)
 
-; ----------------------------------------
-; ACCESS THE BITMAP IMAGE
-; ----------------------------------------
-	OpeningFileName					db	'Assets/Opening.bmp',0
-	OpeningFileHandle				dw	?
+	score_text db 'Time Consumed: $'                          
+	timeScore dw 0                                            ;score for timed mode 
+	scoreCount dw 0                                           ;bricks destroyed ctr 
+	lives dw 3                                                ;lives ctr in level mode                              
+	gamemode db 0                                             ;game mode determinator (0 -> level, 1 -> timed)                           
+	soundOn db 1                                              ;1 -> soundOn, 0 -> soundOff
 
-	FileReadBuffer					db	320 dup (?)
-
-;Debug strings:
-	DebugBool						db	0
-	OpenErrorMsg			db	'File Open Error', 10,'$'
-	FileNotFoundMsg			db	'File not found$' ;error code 2
-	TooManyOpenFilesMsg		db	'Too many open files$' ;error code 4
-	AccessDeniedMsg			db	'Access Denied$' ;error code 5
-	InvalidAccessMsg		db	'Invalid Access$' ;error code 12
-	UnknownErrorMsg			db	'Unknown Error$'
-
-	CloseErrorMsg			db	'File Close Error', 10,'$'
-
-	PointerSetErrorMsg		db	'Pointer Set Error', 10, '$'
-	ReadErrorMsg			db	'Read Error', 10, '$'
-;Debug strings:
-
-	score_text db 'Time Consumed: $'
-	timeScore dw 0
-	scoreCount dw 0
-	lives dw 3
-	ending db ' $'
-	ctr db 0
-	gamemode db 0
-	time db ' $'
-	soundOn db 1
-
-	tens dw 53
-	ones dw 57
-	timeCtr db 0
+	tens dw 53                                                ;tenths position in timer (5)
+	ones dw 57                                                ;ones position in timer (9) 
+	timeCtr db 0                                              ;checks if a second has passed (timeCtr == 100 == 1 second)  
 	
-	entername_text db 'ENTER YOUR NAME:', '$'
-	playername db 'twice', '$'
-	nameLength_text db 'Name should be', '$'
+	entername_text db 'ENTER YOUR NAME:', '$'                 
+	playername db 'twice', '$'                                ;player name variable -> stores the 5 char name 
+	nameLength_text db 'Name should be', '$'                  
 	nameLength_text1 db 'EXACTLY 5 characters', '$'
 	
-	controlB_text db '[B]Back', '$'
+	controlB_text db '[B]Back', '$'                           
 	control1_text db 'MOVE PADDLE', '$'
 	control2_text db 'TOGGLE MENUS', '$'
 	control3_text db 'SELECT', '$'
@@ -75,50 +52,51 @@ EXTERNDELAY = 3
 	level4_text db 'LEVEL 4', '$'
 	level5_text db 'LEVEL 5', '$'
 
-	xloc dw 147
-	yloc dw 129
-	wid dw 25
-	opt db 1
-	optCompleted db 1
-	optOver db 1
-	optLevel db 1
-	currentOpt db 1
-	lmenu db 1
-	control db 1
+	xloc dw 147                                               ;x-location of underline                       
+	yloc dw 129                                               ;y-location of underline
+	wid dw 25                                                 ;underline width 
 	
-	xlocRec dw 0
-	ylocRec dw 0
-	widRec dw 0
-	heightRec dw 0
+	opt db 1                                                  ;checks which menu option is chosen in the main menu 
+	optCompleted db 1                                         ;checks which menu option is chosen in the Game Completed Page  
+	optOver db 1                                              ;checks which menu option is chosen in the Game Over Page  
+	optLevel db 1                                             ;checks which level is chosen
+	optSound db 1                                             ;checks which option is chosen in the Options Page for the sound                                             
+	control db 1                                              ;checks if the Controls Page will be shown
+	begin db 0                                                ;checks if the game is set to begin (1 == begin)
 	
-	tempLifeX dw 0
-	tempLifeY dw 0
-	tempX dw 0
-	tempY dw 0
-	tempW dw 0
-	tempH dw 0
+	xlocRec dw 0                                              ;x-location of line 
+	ylocRec dw 0                                              ;y-location of line 
+	widRec dw 0                                               ;width of line 
+	heightRec dw 0                                            ;height of line 
 	
-	ballY dw 163                   ;initial Y location of ball
-	ballX dw 158                   ;initial X location of ball
-	ballLeft db 1                  ;left movement of ball
-	ballUp db 1	                   ;up movement of ball
-	innerDelay db 0                ;speed of the ball
-	fastBall db 0
+	tempLifeX dw 0                                            ;temp storage for the x-location of heart(life) 
+	tempLifeY dw 0                                            ;temp storage for the y-location of heart(life) 
+	tempX dw 0                                                ;temp storage for the x-location of Controls Page keys 
+	tempY dw 0                                                ;temp storage for the y-location of Controls Page keys 
+	tempW dw 0                                                ;temp storage for the width of Controls Page keys 
+	tempH dw 0                                                ;temp storage for the height of Controls Page keys 
 	
-	color db 0	                   ;brick color
-	startx dw 0	                   ;starting X location of multiple elements
-	starty dw 0                    ;starting Y location of multiple elements
-	endx dw 0                      ;ending X location of multiple elements
-	endy dw 0                      ;ending Y location of multiple elements
-	begin db 0                     ;boolean var for starting the game
+	ballX dw 158                                              ;initial X location of ball
+	ballY dw 163                                              ;initial y-location of ball
+	ballLeft db 1                                             ;checks if ball is moving to the left or right 
+	ballUp db 1	                                              ;checks if ball is moving upwards or downwards 
+	innerDelay db 0                                           ;speed of the ball (0 == slowest)
+	fastBall db 0                                             ;checks the speed of the ball 
 	
-	strikerX dw 140                ;initial X location of the striker (paddle)
-	strikerY dw 170                ;initial Y location of the striker (paddle)
+	color db 0	                                              ;color of multiple elements
+	startx dw 0	                                              ;starting x-location of multiple elements
+	starty dw 0                                               ;starting y-location of multiple elements
+	endx dw 0                                                 ;ending x-location of multiple elements
+	endy dw 0                                                 ;ending y-location of multiple elements
+	 
+	strikerX dw 140                                           ;initial x-location of the striker(paddle)
+	strikerY dw 170                                           ;initial y-location of the striker(paddle)
 	
-	boundaryEnd dw 253             ;ending boundary for the ball and striker
-	boundaryStart dw 30            ;starting boundary for the ball and striker
+	boundaryEnd dw 253                                        ;ending boundary for the ball and striker
+	boundaryStart dw 30                                       ;starting boundary for the ball and striker
 	
-	brick1x dw 0                   ;X and Y locations of the bricks
+	;x and y-locations of the bricks
+	brick1x dw 0                                              
 	brick1y dw 0
 	brick2x dw 0
 	brick2y dw 0
@@ -139,19 +117,9 @@ EXTERNDELAY = 3
 	brick10x dw 0
 	brick10y dw 0
 	
-	musicEnabled db 1	
-	; Notes (approximate frequencies for Super Mario Bros. Overworld theme)
-    do      dw 523   ; do
-    re      dw 587   ; re
-    mi      dw 659   ; mi
-    fa      dw 698   ; fa
-    sol     dw 784   ; sol
-    la      dw 880   ; la
-    ti      dw 988   ; ti
-    do_high dw 1046  ; do (Higher octave)
-
-    clock equ es:6Ch
-    tone dw ?
+	;------------------------------------------------
+	;                    BITMAPS
+	;------------------------------------------------
 	
 	life db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
 		db 00h, 00h, 00h, 00h, 00h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 00h, 00h, 00h, 00h
@@ -321,8 +289,8 @@ EXTERNDELAY = 3
         db 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h
         db 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h
 
-.code
 
+.code
 drawTitle macro x, y, w, h, c
 	mov xlocRec, x
 	mov ylocRec, y
@@ -333,13 +301,13 @@ drawTitle macro x, y, w, h, c
 	call AddRec
 endm
 
-BuildBrick macro A, B, C
+BuildBrick macro X, Y, C
     push ax
     push bx
 	
-    mov ax, A                           ;draw the X position of brick at A
-    mov bx, B                           ;draw the Y position of brick at B
-	MOV color, C
+    mov ax, X                           ;draw the X position of brick at A
+    mov bx, Y                           ;draw the Y position of brick at B
+	mov color, C
     call AddBrick
 	
     pop bx
@@ -401,13 +369,13 @@ local check, done1
     pop ax                      
 endm
 
-DestroyBrick macro  A, B
+DestroyBrick macro  X, Y
 local drawscore1, noSound
     push ax
     push bx
 	
-    mov ax, A                           ;remove brick located at x-position A
-    mov bx, B                           ;remove brick located at y-position B
+    mov ax, X                           ;remove brick located at x-position A
+    mov bx, Y                           ;remove brick located at y-position B
     call RemoveBrick
 	
 	cmp soundOn, 1
@@ -471,8 +439,6 @@ OpenFile proc
 	mov dx, [bp + 6]           ;moves the offset 
 	int 21h 
 
-	jc printError 
-
 	mov bx, [bp + 4] 
 	mov [bx], ax 
 
@@ -480,73 +446,10 @@ OpenFile proc
 
 	jmp procEndOpenFile
 
-printError:
-	cmp [byte ptr DebugBool], 0 
-	je @@zeroAX
-
-	push ax 
-
-	mov ah, 2
-	xor bh, bh
-	xor dx, dx
-	int 10h
-	
-	;Print error message if got an error opening the file:
-	mov dx, offset OpenErrorMsg
-	mov ah, 9
-	int 21h
-
-	pop ax ;get error code
-
-	;print appropriate error message:
-	cmp ax, 2
-	je @@printNotFound
-
-	cmp ax, 4
-	je @@printTooManyFiles
-
-	cmp ax, 5
-	je @@printAccessDenied
-
-	cmp ax, 12
-	je @@printInvalidAccess
-
-
-	;print unknown error:
-	mov dx, offset UnknownErrorMsg
-	mov ah, 9
-	int 21h
-	jmp @@zeroAX
-
-@@printNotFound:
-	mov dx, offset FileNotFoundMsg
-	mov ah, 9
-	int 21h
-	jmp @@zeroAX
-
-@@printTooManyFiles:
-	mov dx, offset TooManyOpenFilesMsg
-	mov ah, 9
-	int 21h
-	jmp @@zeroAX
-
-@@printAccessDenied:
-	mov dx, offset AccessDeniedMsg
-	mov ah, 9
-	int 21h
-	jmp @@zeroAX
-
-@@printInvalidAccess:
-	mov dx, offset InvalidAccessMsg
-	mov ah, 9
-	int 21h
-
-@@zeroAX:
-	xor ax, ax
-
 procEndOpenFile:
 	pop bp 
 	ret 4 
+OpenFile endp 
 OpenFile endp 
 
 CloseFile proc 
@@ -558,11 +461,6 @@ CloseFile proc
 	int 21h
 
 	jnc procEndCloseFIle 
-
-	;Print error if got an error closing the file:
-	mov dx, offset CloseErrorMsg
-	mov ah, 9
-	int 21h
 
 procEndCloseFIle:
 	pop bp
@@ -584,15 +482,8 @@ PrintFullScreenBMP proc
 	mov ah, 42h
 	int 21h
 
-	jc @@printErrorSettingPointer
 
 	jmp @@readFile
-
-@@printErrorSettingPointer:
-	mov dx, offset PointerSetErrorMsg
-	mov ah, 9
-	int 21h
-	jmp @@procEndFullScreenBMP
 
 @@readFile:
 	mov ax, 0A000h                  ;0A000h -> VGA segment address
@@ -1287,7 +1178,6 @@ levelMenu proc
 	int 21h
 	
 	mov optLevel, 1
-	mov lmenu, 1
 	mov xloc, 142
 	mov yloc, 73
 	mov wid, 20
@@ -1343,7 +1233,6 @@ levelMenu proc
 			jmp selectLevel
 		
 	selectedLevel:
-		mov lmenu, 0
 		cmp optLevel, 6
 		je backMenu
 		
@@ -1362,18 +1251,6 @@ levelMenu proc
 	pop dx
 	pop cx
 levelMenu endp
-
-timedmode proc
-	call setVideoMode
-	call drawBoundary
-	call drawBorder
-	call levelOne
-	call BuildB
-	redrawStriker 13
-	redrawBall 15
-	call gameLoop
-	ret
-timedmode endp
 
 timedMenu proc
 	push ax
@@ -1456,7 +1333,6 @@ timedMenu proc
 	int 21h
 	
 	mov optLevel, 1
-	mov lmenu, 1
 	mov xloc, 142
 	mov yloc, 73
 	mov wid, 20
@@ -1512,7 +1388,6 @@ timedMenu proc
 			jmp selectTimed
 		
 	selectedTimed:
-		mov lmenu, 0
 		cmp optLevel, 6
 		jne timed1
 		cmp optLevel, 6
@@ -1918,7 +1793,7 @@ enable proc
     lea dx, back_text
     int 21h
 	
-	mov currentOpt, 1
+	mov optSound, 1
 	mov xloc, 149
 	mov yloc, 129
 	mov wid, 20
@@ -1940,10 +1815,10 @@ enable proc
 		je handleMusicSelection  ; Handle music option selection immediately
 
 		downOption:
-			cmp currentOpt, 3       ; Check if already at the bottom (GO BACK TO MAIN MENU)
+			cmp optSound, 3       ; Check if already at the bottom (GO BACK TO MAIN MENU)
 			je backToTopOption       ; If so, jump to backToTopOption
 
-			add currentOpt, 1       ; Switch selection to the next option
+			add optSound, 1       ; Switch selection to the next option
 			call deleteSelect       ; Remove old underline
 			add yloc, 16             ; Move underline down by 16 pixels
 			call drawSelect         ; Draw new underline
@@ -1951,10 +1826,10 @@ enable proc
 			jmp selectMusicOption   ; Continue the loop
 
 		upOption:
-			cmp currentOpt, 1       ; Check if already at the top (YES)
+			cmp optSound, 1       ; Check if already at the top (YES)
 			je nextToBottomOption    ; If so, jump to nextToBottomOption
 
-			sub currentOpt, 1       ; Switch selection to the previous option
+			sub optSound, 1       ; Switch selection to the previous option
 			call deleteSelect       ; Remove old underline
 			sub yloc, 16             ; Move underline up by 16 pixels
 			call drawSelect         ; Draw new underline
@@ -1962,25 +1837,25 @@ enable proc
 			jmp selectMusicOption    ; Continue the loop
 
 		backToTopOption:       ; Handle going back to the top when at the bottom
-			mov currentOpt, 1       ; Reset to the first option (YES)
+			mov optSound, 1       ; Reset to the first option (YES)
 			call deleteSelect     
 			mov yloc, 129          ; Set yloc to the position of "YES"
 			call drawSelect
 			jmp selectMusicOption  ; Continue the loop
 
 		nextToBottomOption:   ; Handle going to the bottom when at the top
-			mov currentOpt, 3       ; Set to the last option (GO BACK TO MAIN MENU)
+			mov optSound, 3       ; Set to the last option (GO BACK TO MAIN MENU)
 			call deleteSelect
 			mov yloc, 161          ; Set yloc to the position of "GO BACK TO MAIN MENU"
 			call drawSelect
 			jmp selectMusicOption  ; Continue the loop
 	
 		handleMusicSelection:            ; Handle the selected option
-			cmp currentOpt, 1
+			cmp optSound, 1
 			je enableMusic
-			cmp currentOpt, 2
+			cmp optSound, 2
 			je disableMusic
-			cmp currentOpt, 3         ; Check for "GO BACK TO MAIN MENU" option
+			cmp optSound, 3         ; Check for "GO BACK TO MAIN MENU" option
 			je returnToMenu
 
 		enableMusic:
@@ -1997,123 +1872,7 @@ enable proc
 
 enable endp
 
-repeatMusic:
-musicLoop:
-	cmp musicEnabled, 1
-	jne repeatMusic 
-	
-	; Main melody
-		mov bx, offset do      ; do
-		call play_note
-		call delay         ; Short
-		
-		mov bx, offset mi      ; mi
-		call play_note
-		call delay         ; Short
-		
-		mov bx, offset sol     ; sol
-		call play_note
-		call delay         ; Short
-
-		mov bx, offset do_high ; do (high)
-		call play_note
-		call delay         ; Medium
-
-		mov bx, offset ti      ; ti
-		call play_note
-		call delay         ; Short
-
-		mov bx, offset la      ; la
-		call play_note
-		call delay         ; Medium
-
-		mov bx, offset sol     ; sol
-		call play_note
-		call delay         ; Short
-		
-		mov bx, offset mi      ; mi
-		call play_note
-		call delay         ; Long
-		call delay
-
-		; Second part
-		mov bx, offset do_high ; do (high)
-		call play_note
-		call delay         ; Short
-
-		mov bx, offset sol     ; sol
-		call play_note
-		call delay         ; Short
-
-		mov bx, offset fa      ; fa
-		call play_note
-		call delay         ; Medium
-
-		mov bx, offset mi      ; mi
-		call play_note
-		call delay         ; Medium
-
-		mov bx, offset re      ; re
-		call play_note
-		call delay         ; Short
-
-		mov bx, offset do      ; do
-		call play_note
-		call delay         ; Long
-		call delay
-
-		call menu
-
-		jmp musicLoop
-exitMusic:
-	ret
-
-stop_music proc
-    mov al, 0B6h        ; Set timer 2 to mode 3 (square wave)
-    out 43h, al
-    mov ax, 0           ; Set frequency to 0 (silence)
-    out 42h, al
-    mov al, ah
-    out 42h, al
-    ret
-stop_music endp
-
-delay proc                  ; delay procedure
-    push ax               
-    mov ax,40h               
-    mov es,ax                 
-    mov ax,[clock]
-    
-    Ketukawal:
-      cmp ax, [clock]
-      mov cx, 2               
-      je Ketukawal
-    
-    Loopdelay:
-      mov ax, [clock]
-      ketuk:
-        cmp ax,[clock]
-        je ketuk
-        loop Loopdelay
-        pop ax
-      ret
-delay endp  
-
-play_note proc
-    mov  al, 0B6h
-    out  43h, al
-    mov  ax, [bx]    ; Frequency from memory
-    out  42h, al
-    mov  al, ah
-    out  42h, al
-    in   al, 61h
-    or   al, 3
-    out  61h, al
-    ret
-play_note endp
-
 menu proc
-	mov lmenu, 1
 	mov opt, 1
 	mov optLevel, 1
 	mov optCompleted, 1
@@ -2225,7 +1984,6 @@ menu proc
 			jmp select
 		
 	selected1:
-		mov lmenu, 0
 		cmp opt, 1
 		je start_level
 		cmp opt, 2
@@ -2467,7 +2225,6 @@ GameCompletedPage proc
     lea dx, exit_text
     int 21h
     
-	mov lmenu, 1
 	mov xloc, 145
 	mov yloc, 145
 	mov wid, 25
@@ -2529,7 +2286,6 @@ GameCompletedPage proc
 			jmp selectCompleted
 		
 	selectedCompleted:
-		mov lmenu, 0
 		cmp optCompleted, 1
 		je nextLevel1
 		cmp optCompleted, 2
@@ -2636,7 +2392,6 @@ GameOverPage proc
     lea dx, exit_text
     int 21h
     
-	mov lmenu, 1
 	mov xloc, 145
 	mov yloc, 161
 	mov wid, 25
@@ -2692,7 +2447,6 @@ GameOverPage proc
 			jmp selectOver
 		
 	selectedOver:
-		mov lmenu, 0
 		cmp optOver, 1
 		je backMain1
 		cmp optOver, 2
@@ -2759,29 +2513,6 @@ AddBrick proc
     pop ax 
     ret
 AddBrick endp
-
-AddSpecialBrick proc
-    push ax
-    push bx    
-	
-    mov startx, ax
-    mov color, 12                       ;set brick color to light red
-    mov ax, bx
-    mov bx, startx   
-    add bx, 35   
-    mov endx, bx
-    
-    mov starty, ax    
-    mov bx,starty                   
-    add bx,7
-    mov endy,bx
-     
-    call draw
-	
-    pop bx
-    pop ax 
-    ret
-AddSpecialBrick endp
 
 drawball proc
     push bx
