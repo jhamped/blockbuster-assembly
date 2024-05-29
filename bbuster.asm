@@ -10,7 +10,8 @@ EXTERNDELAY = 3                                               ;delay for the mov
 	OpeningFileHandle dw ?                                    
 	FileReadBuffer db 320 dup (?)
 
-	score_text db 'Time Consumed: $'                          
+	congratulations_text db 'Congratulations, ', '$'                          
+	score_text db 'Time Consumed: ', '$'                          
 	timeScore dw 0                                            ;score for timed mode 
 	scoreCount dw 0                                           ;bricks destroyed ctr 
 	lives dw 3                                                ;lives ctr in level mode                              
@@ -1088,7 +1089,7 @@ playNext proc
 	cmp optLevel, 4
 	je playLevel5
 	cmp optLevel, 5
-	je goToMain
+	je playMore
 	
 	playLevel2:
 		mov optLevel, 2
@@ -1106,9 +1107,19 @@ playNext proc
 		mov optLevel, 5
 		jmp play 
 		
-	goToMain:
-		call StartPage
-		ret
+	playMore:
+		cmp gamemode, 1
+		je goToMain
+		
+		mov gamemode, 1
+		mov optLevel, 1
+		call levelmode 
+		ret 
+		
+		goToMain:
+			call StartPage
+			call menu
+			ret
 		
 	play:
 		call levelmode
@@ -2229,46 +2240,45 @@ GameCompletedPage proc
 	call setVideoMode
 	call drawBorder
 	call drawBg
-	call printName
 	
-	drawTitle 67, 29, 5, 19, 13          ;draw Y
-    drawTitle 73, 42, 13, 6, 13
-    drawTitle 87, 29, 5, 19, 13
-    drawTitle 77, 49, 6, 13, 13 
+	drawTitle 67, 24, 5, 19, 13          ;draw Y
+    drawTitle 73, 37, 13, 6, 13
+    drawTitle 87, 24, 5, 19, 13
+    drawTitle 77, 44, 6, 13, 13 
 	
-	drawTitle 98, 29, 6, 33, 13          ;draw O
-    drawTitle 115, 29, 4, 33, 13
-    drawTitle 120, 29, 0, 32, 13
-    drawTitle 105, 29, 9, 6, 13
-    drawTitle 105, 57, 9, 5, 13
+	drawTitle 98, 24, 6, 33, 13          ;draw O
+    drawTitle 115, 24, 4, 33, 13
+    drawTitle 120, 24, 0, 32, 13
+    drawTitle 105, 24, 9, 6, 13
+    drawTitle 105, 52, 9, 5, 13
 
-	drawTitle 127, 29, 6, 33, 13         ;draw U
-    drawTitle 144, 29, 6, 33, 13
-    drawTitle 127, 57, 23, 6, 13
+	drawTitle 127, 24, 6, 33, 13         ;draw U
+    drawTitle 144, 24, 6, 33, 13
+    drawTitle 127, 52, 23, 6, 13
 	
-	drawTitle 168, 29, 5, 33, 13         ;draw D
-    drawTitle 174, 29, 14, 6, 13
-    drawTitle 174, 57, 14, 5, 13
-    drawTitle 184, 33, 6, 27, 13  
+	drawTitle 168, 24, 5, 33, 13         ;draw D
+    drawTitle 174, 24, 14, 6, 13
+    drawTitle 174, 52, 14, 5, 13
+    drawTitle 184, 28, 6, 27, 13  
 	
-	drawTitle 197, 29, 23, 6, 13         ;draw I
-    drawTitle 197, 57, 23, 5, 13
-    drawTitle 206, 36, 6, 20, 13
+	drawTitle 197, 24, 23, 6, 13         ;draw I
+    drawTitle 197, 52, 23, 5, 13
+    drawTitle 206, 31, 6, 20, 13
 	
-	drawTitle 227, 29, 5, 33, 13         ;draw D
-    drawTitle 233, 29, 14, 6, 13
-    drawTitle 233, 57, 14, 5, 13
-    drawTitle 243, 33, 6, 27, 13 
+	drawTitle 227, 24, 5, 33, 13         ;draw D
+    drawTitle 233, 24, 14, 6, 13
+    drawTitle 233, 52, 14, 5, 13
+    drawTitle 243, 28, 6, 27, 13 
 	
-	drawTitle 130, 72, 23, 6, 13         ;draw I
-    drawTitle 130, 99, 23, 5, 13
-    drawTitle 139, 78, 6, 20, 13 
+	drawTitle 130, 67, 23, 6, 13         ;draw I
+    drawTitle 130, 94, 23, 5, 13
+    drawTitle 139, 73, 6, 20, 13 
 	
-	drawTitle 159, 72, 26, 6, 13         ;draw T
-    drawTitle 169, 79, 6, 25, 13
+	drawTitle 159, 67, 26, 6, 13         ;draw T
+    drawTitle 169, 74, 6, 25, 13
 	
-	drawTitle 191, 72, 6, 23, 13         ;draw !
-    drawTitle 191, 99, 6, 5, 13
+	drawTitle 191, 67, 6, 23, 13         ;draw !
+    drawTitle 191, 94, 6, 5, 13
 	
 	mov ah, 02h
     mov bh, 00h
@@ -2309,10 +2319,13 @@ GameCompletedPage proc
     call drawSelect
 	
 	cmp gamemode, 1
-	jne selectCompleted
+	jne congratulations 
 	
 	call computeScore
 	call DrawScores
+	
+	congratulations:
+		call message
 	
 	selectCompleted:
 		mov ah, 00h                ;read keyboard input
@@ -2390,6 +2403,33 @@ GameCompletedPage proc
 	ret
 GameCompletedPage endp
 
+message proc
+	push dx
+    push ax
+                 
+    mov ah, 02h
+	mov dh, 0Eh 
+    mov dl, 09h
+    int 10h
+    
+    lea dx, congratulations_text
+    mov ah, 09h
+    int 21h
+    
+    mov ah, 02h
+	mov dh, 0Eh 
+    mov dl, 1Ah
+    int 10h
+    
+    lea dx, playername
+    mov ah, 09h
+    int 21h
+
+    pop ax
+    pop dx
+	ret 
+message endp 
+
 GameOverPage proc
 	push ax
 	push bx
@@ -2398,7 +2438,6 @@ GameOverPage proc
 	call setVideoMode
 	call drawBorder
 	call drawBg
-	call printName
 	
 	; draw G    
 	drawTitle 91, 32, 30, 6, 5       
