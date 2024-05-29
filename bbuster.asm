@@ -289,6 +289,56 @@ EXTERNDELAY = 3                                               ;delay for the mov
         db 00h, 0Fh, 0Fh, 0Fh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 0Dh, 05h, 05h, 05h, 00h
         db 00h, 00h, 00h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 05h, 00h, 00h, 00h
 
+	trophy db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 04h, 04h, 04h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 04h, 04h, 04h, 00h, 00h
+      db 00h, 04h, 0Eh, 0Eh, 0Eh, 04h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 04h, 0Eh, 0Eh, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 06h, 06h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 06h, 06h, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 04h, 04h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 06h, 06h, 04h, 04h, 04h, 04h, 04h, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 04h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 04h, 00h, 00h, 00h, 04h, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 04h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 00h, 00h, 00h, 04h, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 04h, 04h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 00h, 00h, 04h, 04h, 0Eh, 04h, 00h
+      db 00h, 04h, 0Eh, 0Eh, 04h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 04h, 0Eh, 0Eh, 04h, 00h
+      db 00h, 00h, 04h, 0Eh, 04h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 04h, 00h, 00h, 00h, 04h, 0Eh, 04h, 00h, 00h
+      db 00h, 00h, 04h, 0Eh, 06h, 04h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 00h, 00h, 04h, 04h, 06h, 04h, 00h, 00h
+      db 00h, 00h, 04h, 0Eh, 06h, 06h, 04h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 00h, 04h, 04h, 06h, 04h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 04h, 04h, 06h, 06h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 04h, 04h, 06h, 04h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 04h, 06h, 06h, 06h, 04h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 04h, 06h, 06h, 04h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Fh, 0Eh, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Fh, 0Fh, 0Eh, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Fh, 0Fh, 0Eh, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Fh, 0Eh, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 06h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Fh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Fh, 0Fh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 0Eh, 06h, 06h, 06h, 06h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 04h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+      db 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
 
 .code
 drawTitle macro x, y, w, h, c
@@ -449,7 +499,6 @@ OpenFile proc
 procEndOpenFile:
 	pop bp 
 	ret 4 
-OpenFile endp 
 OpenFile endp 
 
 CloseFile proc 
@@ -758,6 +807,33 @@ drawName proc
 	
 	ret 
 drawName endp
+
+drawTrophy proc
+	mov cx, 20
+	mov dx, 130
+	mov si, offset trophy 
+	
+	drawTrophy1:
+		mov ah, 0Ch 
+		mov al, [si]
+		mov bh, 00h
+		int 10h
+		
+		inc si 
+		inc cx 
+		mov ax, cx
+		sub ax, 20
+		cmp ax, 50
+		jne drawTrophy1 
+		
+		mov cx, 20
+		inc dx
+		mov ax, dx
+		sub ax, 130
+		cmp ax, 50
+		jne drawTrophy1 
+	ret 
+drawTrophy endp 
 
 drawLives proc
 	cmp lives, 3
@@ -1565,8 +1641,8 @@ StartPage proc
 	je draw_control
 	
 	call drawMenuText
-	call menu
 	call printName
+	call menu
 	jmp done
 	
 	draw_control:
@@ -1597,66 +1673,66 @@ StartPage proc
 StartPage endp
 
 drawMenuText proc
-	drawTitle 114, 34, 6, 23, 5            ;draw M shadow
-	drawTitle 114, 34, 25, 6, 5
-	drawTitle 124, 34, 6, 11, 5
-	drawTitle 134, 34, 6, 23, 5
+	drawTitle 114, 34, 6, 23, 8            ;draw M shadow
+	drawTitle 114, 34, 25, 6, 8
+	drawTitle 124, 34, 6, 11, 8
+	drawTitle 134, 34, 6, 23, 8
 	drawTitle 113, 33, 6, 23, 13            ;draw M
 	drawTitle 113, 33, 25, 6, 13
 	drawTitle 123, 33, 6, 11, 13
 	drawTitle 133, 33, 6, 23, 13
 	
-	drawTitle 145, 34, 6, 23, 5            ;draw A shadow 
-	drawTitle 145, 34, 19, 6, 5
-	drawTitle 159, 34, 6, 23, 5
-	drawTitle 145, 45, 19, 6, 5
+	drawTitle 145, 34, 6, 23, 8            ;draw A shadow 
+	drawTitle 145, 34, 19, 6, 8
+	drawTitle 159, 34, 6, 23, 8
+	drawTitle 145, 45, 19, 6, 8
 	drawTitle 144, 33, 6, 23, 13            ;draw A
 	drawTitle 144, 33, 19, 6, 13
 	drawTitle 158, 33, 6, 23, 13
 	drawTitle 144, 44, 19, 6, 13
 	
-	drawTitle 169, 34, 21, 6, 5            ;draw I shadow
-	drawTitle 177, 34, 6, 23, 5
-	drawTitle 169, 51, 21, 6, 5
+	drawTitle 169, 34, 21, 6, 8            ;draw I shadow
+	drawTitle 177, 34, 6, 23, 8
+	drawTitle 169, 51, 21, 6, 8
 	drawTitle 168, 33, 21, 6, 13            ;draw I
 	drawTitle 176, 33, 6, 23, 13
 	drawTitle 168, 50, 21, 6, 13
 	
-	drawTitle 195, 34, 6, 23, 5            ;draw N shadow 
-	drawTitle 195, 34, 19, 6, 5
-	drawTitle 209, 34, 6, 23, 5
+	drawTitle 195, 34, 6, 23, 8            ;draw N shadow 
+	drawTitle 195, 34, 19, 6, 8
+	drawTitle 209, 34, 6, 23, 8
 	drawTitle 194, 33, 6, 23, 13            ;draw N
 	drawTitle 194, 33, 19, 6, 13
 	drawTitle 208, 33, 6, 23, 13
 	
-	drawTitle 114, 65, 6, 23, 5            ;draw M shadow
-	drawTitle 114, 65, 25, 6, 5
-	drawTitle 124, 65, 6, 11, 5
-	drawTitle 134, 65, 6, 23, 5
+	drawTitle 114, 65, 6, 23, 8            ;draw M shadow
+	drawTitle 114, 65, 25, 6, 8
+	drawTitle 124, 65, 6, 11, 8
+	drawTitle 134, 65, 6, 23, 8
 	drawTitle 113, 64, 6, 23, 13            ;draw M
 	drawTitle 113, 64, 25, 6, 13
 	drawTitle 123, 64, 6, 11, 13
 	drawTitle 133, 64, 6, 23, 13
 	
-	drawTitle 145, 65, 6, 23, 5            ;draw E shadow 
-	drawTitle 145, 65, 19, 6, 5
-	drawTitle 145, 73, 13, 6, 5
-	drawTitle 145, 82, 19, 6, 5
+	drawTitle 145, 65, 6, 23, 8            ;draw E shadow 
+	drawTitle 145, 65, 19, 6, 8
+	drawTitle 145, 73, 13, 6, 8
+	drawTitle 145, 82, 19, 6, 8
 	drawTitle 144, 64, 6, 23, 13            ;draw E
 	drawTitle 144, 64, 19, 6, 13
 	drawTitle 144, 72, 13, 6, 13
 	drawTitle 144, 81, 19, 6, 13
 	
-	drawTitle 170, 65, 6, 23, 5            ;draw N shadow
-	drawTitle 170, 65, 19, 6, 5
-	drawTitle 184, 65, 6, 23, 5
+	drawTitle 170, 65, 6, 23, 8            ;draw N shadow
+	drawTitle 170, 65, 19, 6, 8
+	drawTitle 184, 65, 6, 23, 8
 	drawTitle 169, 64, 6, 23, 13            ;draw N
 	drawTitle 169, 64, 19, 6, 13
 	drawTitle 183, 64, 6, 23, 13
 	
-	drawTitle 195, 65, 6, 23, 5            ;draw U shadow
-	drawTitle 195, 82, 19, 6, 5
-	drawTitle 209, 65, 6, 23, 5
+	drawTitle 195, 65, 6, 23, 8            ;draw U shadow
+	drawTitle 195, 82, 19, 6, 8
+	drawTitle 209, 65, 6, 23, 8
 	drawTitle 194, 64, 6, 23, 13            ;draw U
 	drawTitle 194, 81, 19, 6, 13
 	drawTitle 208, 64, 6, 23, 13
@@ -2155,44 +2231,44 @@ GameCompletedPage proc
 	call drawBg
 	call printName
 	
-	drawTitle 67, 29, 5, 19, 5          ;draw Y
-    drawTitle 73, 42, 13, 6, 5
-    drawTitle 87, 29, 5, 19, 5
-    drawTitle 77, 49, 6, 13, 5 
+	drawTitle 67, 29, 5, 19, 13          ;draw Y
+    drawTitle 73, 42, 13, 6, 13
+    drawTitle 87, 29, 5, 19, 13
+    drawTitle 77, 49, 6, 13, 13 
 	
-	drawTitle 98, 29, 6, 33, 5          ;draw O
-    drawTitle 115, 29, 4, 33, 5
-    drawTitle 120, 29, 0, 32, 5
-    drawTitle 105, 29, 9, 6, 5
-    drawTitle 105, 57, 9, 5, 5 
+	drawTitle 98, 29, 6, 33, 13          ;draw O
+    drawTitle 115, 29, 4, 33, 13
+    drawTitle 120, 29, 0, 32, 13
+    drawTitle 105, 29, 9, 6, 13
+    drawTitle 105, 57, 9, 5, 13
 
-	drawTitle 127, 29, 6, 33, 5         ;draw U
-    drawTitle 144, 29, 6, 33, 5
-    drawTitle 127, 57, 23, 6, 5
+	drawTitle 127, 29, 6, 33, 13         ;draw U
+    drawTitle 144, 29, 6, 33, 13
+    drawTitle 127, 57, 23, 6, 13
 	
-	drawTitle 168, 29, 5, 33, 5         ;draw D
-    drawTitle 174, 29, 14, 6, 5
-    drawTitle 174, 57, 14, 5, 5
-    drawTitle 184, 33, 6, 27, 5  
+	drawTitle 168, 29, 5, 33, 13         ;draw D
+    drawTitle 174, 29, 14, 6, 13
+    drawTitle 174, 57, 14, 5, 13
+    drawTitle 184, 33, 6, 27, 13  
 	
-	drawTitle 197, 29, 23, 6, 5         ;draw I
-    drawTitle 197, 57, 23, 5, 5
-    drawTitle 206, 36, 6, 20, 5
+	drawTitle 197, 29, 23, 6, 13         ;draw I
+    drawTitle 197, 57, 23, 5, 13
+    drawTitle 206, 36, 6, 20, 13
 	
-	drawTitle 227, 29, 5, 33, 5         ;draw D
-    drawTitle 233, 29, 14, 6, 5
-    drawTitle 233, 57, 14, 5, 5
-    drawTitle 243, 33, 6, 27, 5 
+	drawTitle 227, 29, 5, 33, 13         ;draw D
+    drawTitle 233, 29, 14, 6, 13
+    drawTitle 233, 57, 14, 5, 13
+    drawTitle 243, 33, 6, 27, 13 
 	
-	drawTitle 130, 72, 23, 6, 5         ;draw I
-    drawTitle 130, 99, 23, 5, 5
-    drawTitle 139, 78, 6, 20, 5 
+	drawTitle 130, 72, 23, 6, 13         ;draw I
+    drawTitle 130, 99, 23, 5, 13
+    drawTitle 139, 78, 6, 20, 13 
 	
-	drawTitle 159, 72, 26, 6, 5         ;draw T
-    drawTitle 169, 79, 6, 25, 5
+	drawTitle 159, 72, 26, 6, 13         ;draw T
+    drawTitle 169, 79, 6, 25, 13
 	
-	drawTitle 191, 72, 6, 23, 5         ;draw !
-    drawTitle 191, 99, 6, 5, 5
+	drawTitle 191, 72, 6, 23, 13         ;draw !
+    drawTitle 191, 99, 6, 5, 13
 	
 	mov ah, 02h
     mov bh, 00h
@@ -2225,6 +2301,8 @@ GameCompletedPage proc
     lea dx, exit_text
     int 21h
     
+	call drawTrophy
+	
 	mov xloc, 145
 	mov yloc, 145
 	mov wid, 25
