@@ -126,6 +126,7 @@ printScore         --> fetches the score from the stack, and prints it on the sc
    Game Result Pages
 -----------------------
 GameCompletedPage  --> draws the "YOU DID IT" text indicating level completion, and prints menus (NEXT, MAIN MENU, EXIT) 
+drawTrophy         --> draws a tropy on the Game Completed Page
 GameOverPage       --> draws the "GAME OVER" text indicating level failure, and prints menus (MAIN MENU, EXIT) 
 
 
