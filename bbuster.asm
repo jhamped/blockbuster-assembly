@@ -2398,8 +2398,8 @@ gameLoop:
 	jne none1                             ;if not, jump to none1 as timer is yet to be printed
 	dec ones                              ;if timeCtr=100, decrease the value of ones 
 	mov timeCtr, 0                        ;resets timeCtr
-	call printTime                        ;prints the time on the screen 
 	call stopTime                         ;checks if time is set to stop 
+	call printTime                        ;prints the time on the screen 
 	
 	;---if timer is not set to print---
 	none1:
