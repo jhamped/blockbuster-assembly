@@ -82,7 +82,7 @@ RemoveBrick        --> removes bricks from the screen (draws bricks in black, an
 drawball           --> draws ball on the screen
 Collisionwall      --> checks if ball collides with the wall/ boundaries
 CollisionStriker   --> checks if ball collides with the striker
-ballMove           --> moves the ball in the direction specified (left and up at first) 
+ballMove           --> moves the ball in the direction specified (left and up at first), and controls the speed 
 switcher           --> changes the ball's direction
 
 
@@ -97,6 +97,7 @@ drawStriker        --> draws the striker on the screen
 -----------------------
 drawLives          --> determines how many hearts will be drawn after every gameloop and their coordinates 
 drawLife           --> draws heart(s) on the screen  
+decLives           --> decreases the lives count, and resets the ball's position
 removeLives        --> removes the hearts on the screen
 
 
@@ -126,6 +127,7 @@ printScore         --> fetches the score from the stack, and prints it on the sc
    Game Result Pages
 -----------------------
 GameCompletedPage  --> draws the "YOU DID IT" text indicating level completion, and prints menus (NEXT, MAIN MENU, EXIT) 
+message            --> prints a congratulatory message
 drawTrophy         --> draws a tropy on the Game Completed Page
 GameOverPage       --> draws the "GAME OVER" text indicating level failure, and prints menus (MAIN MENU, EXIT) 
 
@@ -134,6 +136,7 @@ GameOverPage       --> draws the "GAME OVER" text indicating level failure, and 
          Misc
 -----------------------
 setVideoMode       --> sets the video mode to VGA, and clears the screen
+addRec             --> draws the line on the screen 
 drawSelect         --> draws the underline on the menus to indicate selected option 
 deleteSelect       --> removes the underline (happens when a key is pressed, moving/ redrawing the underline to a new position) 
 drawBoundary       --> draws the boundary/ walls on the gameplay screen
@@ -142,3 +145,13 @@ drawBg             --> adds starts on the screen (used outside of the gameplay)
 draw               --> draws ball, striker, and boundary (prints colored pixel on the screen)
 sleep              --> continues the loop 
 beep               --> creates a 'beep' sound (called when a brick is destroyed, and when a menu is selected) 
+
+
+
+; ----------------------------------------
+;              Title Page
+; ----------------------------------------
+
+mov es, ax                            ;moves the segment address to es (extra segment register)
+mov di, 0F8BFh	                      ;sets the offset value from the segment address 
+es:di --> memory address 
