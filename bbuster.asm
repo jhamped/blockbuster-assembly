@@ -2429,6 +2429,8 @@ checkKeyboard proc
     je  rightKey
     cmp ax, 4B00h		                  ;checks if the left-key arrow is pressed
     je leftKey
+	cmp ax, 011Bh                         ;checks if the escape key is pressed 
+	je exitGame
     
     noInput:
 		ret  
@@ -2454,6 +2456,10 @@ checkKeyboard proc
 		cmp begin, 0
 		jz moveBallLeft
 		jmp noInput
+		
+	exitGame:
+		call StartPage                    ;goes back to the main menu
+		ret
     
 	;---moves ball to the right---
 	moveBallRight:
