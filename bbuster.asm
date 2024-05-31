@@ -483,11 +483,11 @@ endm
 
 
 main proc
-    mov ax,@data                          ;incorporate the data values
+    mov ax,@data                          ;incorporates the data values
     mov ds,ax			        
 	
 	call setVideoMode 
-	call PrintOpeningPage                 ;print opening screen
+	call PrintOpeningPage                 ;prints opening screen
 main endp
 
 
