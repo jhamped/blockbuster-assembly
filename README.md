@@ -20,7 +20,6 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
    </li>
-    <li><a href="#how-to-play">How To Play</a></li>
     <li><a href="#developers">Developers</a></li>
   </ol>
 </details>
